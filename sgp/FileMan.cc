@@ -316,13 +316,15 @@ HWFILE FileOpen(const char* const filename, const FileOpenFlags flags)
 		}
 	}
 
-	if (d < 0) throw std::runtime_error("Opening file failed");
+	std::string sError = "Opening file failed: ";
+	sError += filename;
+	if (d < 0) throw std::runtime_error(sError);
 
 	FILE* const f = fdopen(d, fmode);
 	if (!f)
 	{
 		close(d);
-		throw std::runtime_error("Opening file failed");
+		throw std::runtime_error(sError);
 	}
 
 	file->flags  = SGPFILE_REAL;
