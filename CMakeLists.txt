@@ -11,8 +11,6 @@ IF(DEBUG)
   set( CMAKE_BUILD_TYPE Debug)
   add_definitions( -D_DEBUG)
   add_definitions( -DSGP_DEBUG)
-ELSE(DEBUG)
-  set( CMAKE_BUILD_TYPE Release)
 ENDIF(DEBUG)
 
 #language defines uncomment exactly one
