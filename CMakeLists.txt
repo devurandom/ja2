@@ -60,6 +60,7 @@ include_directories(${CMAKE_SOURCE_DIR}/sgp)
 include_directories(${SDL_INCLUDE_DIR})
 
 set( JA2SRCS
+	Build/Local.cc
 	Build/AniViewScreen.cc
 	Build/Credits.cc
 	Build/Fade_Screen.cc

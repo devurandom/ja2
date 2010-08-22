@@ -174,7 +174,7 @@ ScreenID InitScreenHandle(void)
 		SetFontAttributes(TINYFONT1, FONT_MCOLOR_WHITE);
 
 		const INT32 x = 10;
-		const INT32 y = SCREEN_HEIGHT;
+		const INT32 y = g_screen_height;
 
 #ifdef JA2BETAVERSION
 		MPrint(x, y - 60, L"(Beta version error reporting enabled)");
@@ -529,8 +529,8 @@ ScreenID SexScreenHandle(void)
 
 	// Calculate smily face positions...
 	ETRLEObject const& pTrav = guiSMILY->SubregionProperties(0);
-	INT16       const  sX    = (SCREEN_WIDTH  - pTrav.usWidth)  / 2;
-	INT16       const  sY    = (SCREEN_HEIGHT - pTrav.usHeight) / 2;
+	INT16       const  sX    = (g_screen_width  - pTrav.usWidth)  / 2;
+	INT16       const  sY    = (g_screen_height - pTrav.usHeight) / 2;
 
 	BltVideoObject(FRAME_BUFFER, guiSMILY, bCurFrame < 24 ? 0 : bCurFrame % 8, sX, sY);
 
@@ -628,7 +628,7 @@ void DoDemoIntroduction(void)
 					if( usFadeLimit )
 					{
 						usFadeLimit--;
-						FRAME_BUFFER->ShadowRectUsingLowPercentTable(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+						FRAME_BUFFER->ShadowRectUsingLowPercentTable(0, 0, g_screen_width, g_screen_height);
 						InvalidateScreen();
 					}
 					else
@@ -750,7 +750,7 @@ ScreenID DemoExitScreenHandle(void)
 		InvalidateScreen( );
 
 		SetCurrentCursorFromDatabase( VIDEO_NO_CURSOR );
-		MSYS_DefineRegion(&BackRegion, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, MSYS_PRIORITY_HIGHEST, VIDEO_NO_CURSOR, MSYS_NO_CALLBACK, MSYS_NO_CALLBACK);
+		MSYS_DefineRegion(&BackRegion, 0, 0, g_screen_width, g_screen_height, MSYS_PRIORITY_HIGHEST, VIDEO_NO_CURSOR, MSYS_NO_CALLBACK, MSYS_NO_CALLBACK);
 
 		// Init screen
 		bCurFrame = 0;
@@ -771,7 +771,7 @@ ScreenID DemoExitScreenHandle(void)
 	if( !uiStartTime )
 	{
 		uiStartTime = uiTime;
-		usCenter = SCREEN_WIDTH / 2 - (StringPixLength(gpDemoString[0], FONT14ARIAL) + 10) + (StringPixLength(gpDemoString[0], FONT14ARIAL) + 10);
+		usCenter = g_screen_width / 2 - (StringPixLength(gpDemoString[0], FONT14ARIAL) + 10) + (StringPixLength(gpDemoString[0], FONT14ARIAL) + 10);
 		uiWidthString = StringPixLength( gpDemoString[0], FONT14ARIAL );
 		SetFontAttributes(FONT14ARIAL, FONT_YELLOW);
 	}
@@ -929,7 +929,7 @@ ScreenID DemoExitScreenHandle(void)
 				  1 + 262 * iPercentage / 50,
 				  1 + 209 * iPercentage / 50
 			};
-			SGPBox const DstRect = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
+			SGPBox const DstRect = { 0, 0, g_screen_width, g_screen_height };
 			BltVideoSurface(FRAME_BUFFER, guiSAVEBUFFER, 0, 0, NULL);
 			BltStretchVideoSurface(FRAME_BUFFER, uiCollageID, &SrcRect, &DstRect);
 			InvalidateScreen();
@@ -941,8 +941,8 @@ ScreenID DemoExitScreenHandle(void)
 			{
 				189 * (iPercentage - 50) / 50,
 				 20 * (iPercentage - 50) / 50,
-				SCREEN_WIDTH  - 377 * (iPercentage - 50) / 50,
-				SCREEN_HEIGHT - 270 * (iPercentage - 50) / 50
+				g_screen_width  - 377 * (iPercentage - 50) / 50,
+				g_screen_height - 270 * (iPercentage - 50) / 50
 			};
 			BltVideoSurface(FRAME_BUFFER, guiSAVEBUFFER, 0, 0, NULL);
 			BltStretchVideoSurface(FRAME_BUFFER, uiCollageID, &SrcRect, &DstRect);
@@ -955,7 +955,7 @@ ScreenID DemoExitScreenHandle(void)
 			SetMusicFadeSpeed(50);
 			BltVideoSurface(guiSAVEBUFFER, FRAME_BUFFER, 0, 0, NULL);
 			ubCurrentScreen = 4;
-			SetFontDestBuffer(FRAME_BUFFER, 0, 230, SCREEN_WIDTH, SCREEN_HEIGHT);
+			SetFontDestBuffer(FRAME_BUFFER, 0, 230, g_screen_width, g_screen_height);
 			SetFont( FONT10ARIAL );
 			SetFontForeground( FONT_GRAY2 );
 			uiStartTime = GetJA2Clock();
@@ -994,7 +994,7 @@ ScreenID DemoExitScreenHandle(void)
 
 		BlitBufferToBuffer( guiSAVEBUFFER, FRAME_BUFFER, 100, 230, 440, 250 );
 		InvalidateRegion( 100, 230, 540, 640 );
-		yp = SCREEN_HEIGHT - iPercentage / 40; //500 (0%) to -500 (100%)
+		yp = g_screen_height - iPercentage / 40; //500 (0%) to -500 (100%)
 		yp = MAX( yp, -400 );
 		for( i = 2; i < 40; i++ )
 		{
@@ -1014,7 +1014,7 @@ ScreenID DemoExitScreenHandle(void)
 			SetFontForeground(fg);
 			wchar_t const* const String = gpDemoString[i];
 			width = StringPixLength(String, font);
-			MPrint((SCREEN_WIDTH - width) / 2, yp + i * 17, String);
+			MPrint((g_screen_width - width) / 2, yp + i * 17, String);
 		}
 		if( !fSetMusicToFade && iPercentage > 43000 )
 		{
@@ -1091,7 +1091,7 @@ ScreenID DemoExitScreenHandle(void)
 				  1 + 330 * iPercentage / 50,
 				  1 + 147 * iPercentage / 50
 			};
-			SGPBox const DstRect = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
+			SGPBox const DstRect = { 0, 0, g_screen_width, g_screen_height };
 			BltVideoSurface(FRAME_BUFFER, guiSAVEBUFFER, 0, 0, NULL);
 			BltStretchVideoSurface(FRAME_BUFFER, uiCollageID, &SrcRect, &DstRect);
 			InvalidateScreen();
@@ -1107,8 +1107,8 @@ ScreenID DemoExitScreenHandle(void)
 #else
 				246 * (iPercentage - 50) / 50,
 #endif
-				SCREEN_WIDTH  - 309 * (iPercentage - 50) / 50,
-				SCREEN_HEIGHT - 332 * (iPercentage - 50) / 50
+				g_screen_width  - 309 * (iPercentage - 50) / 50,
+				g_screen_height - 332 * (iPercentage - 50) / 50
 			};
 			BltVideoSurface(FRAME_BUFFER, guiSAVEBUFFER, 0, 0, NULL);
 			BltStretchVideoSurface(FRAME_BUFFER, uiCollageID, &SrcRect, &DstRect);
@@ -1169,7 +1169,7 @@ ScreenID DemoExitScreenHandle(void)
 			PlayJA2Sample(ENTERING_TEXT, MIDVOLUME, 1, 39 + iPercentage / 2);
 			wcscpy( str, gpDemoString[40] );
 			str[ uiCharsToPrint ] = L'\0';
-			const INT32 x = (SCREEN_WIDTH - uiWidthString) / 2;
+			const INT32 x = (g_screen_width - uiWidthString) / 2;
 #if defined GERMAN
 			const INT32 y = 370;
 #else
