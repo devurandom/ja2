@@ -35,6 +35,8 @@
 #include "WCheck.h"
 #include <math.h>
 
+#include <stdexcept>
+#include <iostream>
 
 UINT16* gpZBuffer = NULL;
 
@@ -1173,6 +1175,7 @@ zlevel_topmost:
 							fZWrite = TRUE;
 						}
 
+						try {
 						// RENDER
 						if (uiLevelNodeFlags & LEVELNODE_WIREFRAME &&
 								!gGameSettings.fOptions[TOPTION_TOGGLE_WIREFRAME])
@@ -1561,6 +1564,10 @@ zlevel_topmost:
 									}
 								}
 							}
+						}
+						}
+						catch (std::exception &e) {
+							std::cerr << "Error during rendering of object " << hVObject << ": " << e.what();
 						}
 
 next_prev_node:
