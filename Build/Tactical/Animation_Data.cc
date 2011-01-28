@@ -654,7 +654,7 @@ void LoadAnimationSurface(UINT16 const usSoldierID, UINT16 const usSurfaceIndex,
 			AnimDebugMsg(String("Surface Database: Loading %d", usSurfaceIndex));
 
 			AutoSGPImage   hImage(CreateImage(a->Filename, IMAGE_ALLDATA));
-			AutoSGPVObject hVObject(AddVideoObjectFromHImage(hImage));
+			AutoSGPVObject hVObject(AddVideoObjectFromHImage(hImage, a->Filename));
 
 			// Get aux data
 			if (hImage->uiAppDataSize != hVObject->SubregionCount() * sizeof(AuxObjectData))

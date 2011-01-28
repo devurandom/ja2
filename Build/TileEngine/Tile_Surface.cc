@@ -26,7 +26,7 @@ try
 {
 	// Add tile surface
 	AutoSGPImage   hImage(CreateImage(cFilename, IMAGE_ALLDATA));
-	AutoSGPVObject hVObject(AddVideoObjectFromHImage(hImage));
+	AutoSGPVObject hVObject(AddVideoObjectFromHImage(hImage, cFilename));
 
 	// Load structure data, if any.
 	// Start by hacking the image filename into that for the structure data

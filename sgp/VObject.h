@@ -104,14 +104,14 @@ void ShutdownVideoObjectManager(void);
 extern UINT32 guiVObjectSize;
 
 	void PerformVideoInfoDumpIntoFile(const char* filename, BOOLEAN fAppend);
-	SGPVObject* AddAndRecordVObjectFromHImage(SGPImage*, UINT32 uiLineNum, const char* pSourceFile);
+	SGPVObject* AddAndRecordVObjectFromHImage(SGPImage*, const char *filename, UINT32 uiLineNum, const char* pSourceFile);
 	SGPVObject* AddAndRecordVObjectFromFile(const char* ImageFile, UINT32 uiLineNum, const char* pSourceFile);
-	#define AddVideoObjectFromHImage(a) AddAndRecordVObjectFromHImage(a, __LINE__, __FILE__)
+	#define AddVideoObjectFromHImage(a, f) AddAndRecordVObjectFromHImage(a, f, __LINE__, __FILE__)
 	#define AddVideoObjectFromFile(a)   AddAndRecordVObjectFromFile(  a, __LINE__, __FILE__)
 #else
 	SGPVObject* AddStandardVideoObjectFromHImage(SGPImage*);
 	SGPVObject* AddStandardVideoObjectFromFile(const char* ImageFile);
-	#define AddVideoObjectFromHImage(a) AddStandardVideoObjectFromHImage(a)
+	#define AddVideoObjectFromHImage(a, f) AddStandardVideoObjectFromHImage(a)
 	#define AddVideoObjectFromFile(a)   AddStandardVideoObjectFromFile(a)
 #endif
 

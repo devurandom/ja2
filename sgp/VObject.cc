@@ -411,10 +411,12 @@ static void RecordVObject(SGPVObject* const vo, const char* Filename, UINT32 uiL
 }
 
 
-SGPVObject* AddAndRecordVObjectFromHImage(SGPImage* const img, UINT32 uiLineNum, const char* pSourceFile)
+SGPVObject* AddAndRecordVObjectFromHImage(SGPImage* const img, const char *filename, UINT32 uiLineNum, const char* pSourceFile)
 {
 	SGPVObject* const vo = AddStandardVideoObjectFromHImage(img);
-	RecordVObject(vo, "<IMAGE>", uiLineNum, pSourceFile);
+	char str[512];
+	snprintf(str, 512, "<IMAGE:%s>", filename);
+	RecordVObject(vo, str, uiLineNum, pSourceFile);
 	return vo;
 }
 
