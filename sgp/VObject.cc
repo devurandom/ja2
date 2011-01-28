@@ -125,7 +125,7 @@ ETRLEObject const& SGPVObject::SubregionProperties(size_t const idx) const
 	if (idx >= SubregionCount())
 	{
 		std::stringstream ssError;
-		ssError << "Tried to access invalid subregion (" << idx << "/" << SubregionCount() << ") in video object";
+		ssError << "Tried to access invalid subregion " << idx << "/" << SubregionCount() << " in video object";
 #ifdef SGP_VIDEO_DEBUGGING
 		ssError << " (" << name_ << " created by " << code_ << ")";
 #endif
