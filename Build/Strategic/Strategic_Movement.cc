@@ -1,4 +1,5 @@
 #include <stdexcept>
+#include <sstream>
 
 #include "LoadSaveData.h"
 #include "Map_Screen_Interface_Bottom.h"
@@ -1000,12 +1001,18 @@ void CalculateNextMoveIntention( GROUP *pGroup )
 	//Determine if we are at a waypoint.
 	i = pGroup->ubNextWaypointID;
 	wp = pGroup->pWaypoints;
-	while( i-- )
+	while( wp && i-- )
 	{ //Traverse through the waypoint list to the next waypoint ID
-		Assert( wp );
 		wp = wp->next;
 	}
 	Assert( wp );
+	Assert( i == 0 );
+	if( wp == NULL || i != 0 )
+	{
+		std::stringstream ssError("Waypoint ID ");
+		ssError << pGroup->ubNextWaypointID << " not found, list exhausted after " << pGroup->ubNextWaypointID - i << " elements" << std::endl;
+		throw std::logic_error(ssError.str());
+	}
 
 	//We have the next waypoint, now check if we are actually there.
 	if( pGroup->ubSectorX == wp->x && pGroup->ubSectorY == wp->y )
