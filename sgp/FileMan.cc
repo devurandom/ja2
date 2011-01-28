@@ -316,9 +316,11 @@ HWFILE FileOpen(const char* const filename, const FileOpenFlags flags)
 		}
 	}
 
-	std::string sError = "Opening file failed: ";
+	std::string sError("Opening file failed: ");
 	sError += filename;
-	if (d < 0) throw std::runtime_error(sError);
+	sError += " (from fd)";
+	if (d < 0)
+		throw std::runtime_error(sError);
 
 	FILE* const f = fdopen(d, fmode);
 	if (!f)
