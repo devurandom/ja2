@@ -1,4 +1,5 @@
 #include <stdexcept>
+#include <sstream>
 
 #include "Debug.h"
 #include "HImage.h"
@@ -123,7 +124,13 @@ ETRLEObject const& SGPVObject::SubregionProperties(size_t const idx) const
 {
 	if (idx >= SubregionCount())
 	{
-		throw std::logic_error("Tried to access invalid subregion in video object");
+		std::stringstream ssError;
+		ssError << "Tried to access invalid subregion (" << idx << "/" << SubregionCount() << ") in video object";
+#ifdef SGP_VIDEO_DEBUGGING
+		ssError << " (" << name_ << " created by " << code_ << ")";
+#endif
+		ssError << std::endl;
+		throw std::logic_error(ssError.str());
 	}
 	return etrle_object_[idx];
 }
