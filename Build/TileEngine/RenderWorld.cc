@@ -454,7 +454,12 @@ static void RenderTiles(RenderTilesFlags const uiFlags, INT32 const iStartPointX
 					 * for mouse position over objects. Experimental! */
 					if (check_for_mouse_detections && me.pStructHead)
 					{
-						LogMouseOverInteractiveTile(uiTileIndex);
+						try {
+							LogMouseOverInteractiveTile(uiTileIndex);
+						}
+						catch (std::exception &e) {
+							std::cerr << "Error while mouse-over-interactive-tile " << uiTileIndex << ": " << e.what();
+						}
 					}
 
 					if (uiFlags & TILES_MARKED && !(me.uiFlags & MAPELEMENT_REDRAW)) goto next_tile;
@@ -1567,7 +1572,7 @@ zlevel_topmost:
 						}
 						}
 						catch (std::exception &e) {
-							std::cerr << "Error during rendering of object " << hVObject << ": " << e.what();
+							std::cerr << "Error during rendering of object <" << hVObject << "> at tile " << uiTileIndex << ": " << e.what();
 						}
 
 next_prev_node:
