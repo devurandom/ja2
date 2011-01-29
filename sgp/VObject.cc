@@ -130,7 +130,7 @@ ETRLEObject const& SGPVObject::SubregionProperties(size_t const idx) const
 		ssError << " (" << name_ << " created by " << code_ << ")";
 #endif
 		ssError << std::endl;
-		throw std::logic_error(ssError.str());
+		throw std::out_of_range(ssError.str());
 	}
 	return etrle_object_[idx];
 }
@@ -152,7 +152,7 @@ UINT8 SGPVObject::GetETRLEPixelValue(UINT16 const usETRLEIndex, UINT16 const usX
 
 	if (usX >= pETRLEObject.usWidth || usY >= pETRLEObject.usHeight)
 	{
-		throw std::logic_error("Tried to get pixel from invalid coordinate");
+		throw std::out_of_range("Tried to get pixel from invalid coordinate");
 	}
 
 	// Assuming everything's okay, go ahead and look...

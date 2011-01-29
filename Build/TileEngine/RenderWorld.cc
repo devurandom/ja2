@@ -457,6 +457,9 @@ static void RenderTiles(RenderTilesFlags const uiFlags, INT32 const iStartPointX
 						try {
 							LogMouseOverInteractiveTile(uiTileIndex);
 						}
+						catch (std::out_of_range &e) {
+							std::cerr << "Out-of-range error while mouse-over-interactive-tile " << uiTileIndex << ": " << e.what();
+						}
 						catch (std::exception &e) {
 							std::cerr << "Error while mouse-over-interactive-tile " << uiTileIndex << ": " << e.what();
 						}
@@ -1570,6 +1573,9 @@ zlevel_topmost:
 								}
 							}
 						}
+						}
+						catch (std::out_of_range &e) {
+							std::cerr << "Out-of-range error during rendering of object <" << hVObject << "> at tile " << uiTileIndex << ": " << e.what();
 						}
 						catch (std::exception &e) {
 							std::cerr << "Error during rendering of object <" << hVObject << "> at tile " << uiTileIndex << ": " << e.what();

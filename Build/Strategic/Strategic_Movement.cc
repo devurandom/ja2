@@ -1011,7 +1011,7 @@ void CalculateNextMoveIntention( GROUP *pGroup )
 	{
 		std::stringstream ssError("Waypoint ID ");
 		ssError << pGroup->ubNextWaypointID << " not found, list exhausted after " << pGroup->ubNextWaypointID - i << " elements" << std::endl;
-		throw std::logic_error(ssError.str());
+		throw std::out_of_range(ssError.str());
 	}
 
 	//We have the next waypoint, now check if we are actually there.
