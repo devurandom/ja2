@@ -592,6 +592,11 @@ static void RemoveGroupFromList(GROUP* const g)
 		Assert(uniqueIDMask[index] & mask);
 		uniqueIDMask[index] &= ~mask;
 
+		if( g == gpBattleGroup )
+		{
+			gpBattleGroup = NULL;
+		}
+
 		MemFree(g);
 		return;
 	}

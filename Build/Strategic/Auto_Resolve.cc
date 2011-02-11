@@ -385,7 +385,6 @@ void EliminateAllEnemies( UINT8 ubSectorX, UINT8 ubSectorY )
 			if (g.ubSectorX != ubSectorX) continue;
 			if (g.ubSectorY != ubSectorY) continue;
 			RemoveGroupFromStrategicAILists(g);
-			if (gpBattleGroup == &g) gpBattleGroup = 0;
 			RemoveGroup(g);
 		}
 		if( gpBattleGroup )
