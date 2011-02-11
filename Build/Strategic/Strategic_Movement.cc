@@ -972,11 +972,56 @@ static void TriggerPrebattleInterface(MessageBoxReturnValue const ubResult)
 }
 
 
+static int CountWaypoints( const WAYPOINT *pWaypointList )
+{
+	const WAYPOINT *wp = pWaypointList;
+	int count = 0;
+
+	for( wp = pWaypointList; wp != NULL; wp = wp->next )
+	{
+		count++;
+	}
+
+	return count;
+}
+
+
+static WAYPOINT * GetWaypointAtID( const WAYPOINT *pWaypointList, int ubWaypointID )
+{
+	const WAYPOINT *wp = pWaypointList;
+	int i = 0;
+
+	for( i = 0; i < ubWaypointID && wp != NULL; i++ )
+	{ //Traverse through the waypoint list to the next waypoint ID
+		wp = wp->next;
+	}
+	Assert( wp != NULL );
+	Assert( i == ubWaypointID );
+	if( wp == NULL || i != ubWaypointID )
+	{
+		int wp_count = CountWaypoints( pWaypointList );
+
+		std::stringstream ssError("Waypoint ");
+		ssError << ubWaypointID << " not found in list of size " << wp_count << std::endl;
+		throw std::out_of_range(ssError.str());
+	}
+
+	return (WAYPOINT*)wp;
+}
+
+
+static WAYPOINT *GroupGetNextWaypoint( const GROUP *pGroup )
+{
+	Assert( pGroup );
+
+	return GetWaypointAtID( pGroup->pWaypoints, pGroup->ubNextWaypointID );
+}
+
+
 //This will get called after a battle is auto-resolved or automatically after arriving
 //at the next sector during a move and the area is clear.
 void CalculateNextMoveIntention( GROUP *pGroup )
 {
-	INT32 i;
 	WAYPOINT *wp;
 
 	Assert( pGroup );
@@ -999,26 +1044,7 @@ void CalculateNextMoveIntention( GROUP *pGroup )
 	}
 
 	//Determine if we are at a waypoint.
-	wp = pGroup->pWaypoints;
-	for( i = pGroup->ubNextWaypointID; i > 0 && wp != NULL; i-- )
-	{ //Traverse through the waypoint list to the next waypoint ID
-		wp = wp->next;
-	}
-	Assert( wp != NULL );
-	Assert( i == 0 );
-	if( wp == NULL || i != 0 )
-	{
-		WAYPOINT *wp_tmp = pGroup->pWaypoints;
-		int wp_count = 0;
-		while (wp_tmp) {
-			wp_tmp = wp_tmp->next;
-			wp_count++;
-		}
-
-		std::stringstream ssError("Waypoint ");
-		ssError << pGroup->ubNextWaypointID << " not found in list of size " << wp_count << std::endl;
-		throw std::out_of_range(ssError.str());
-	}
+	wp = GroupGetNextWaypoint( pGroup );
 
 	//We have the next waypoint, now check if we are actually there.
 	if( pGroup->ubSectorX == wp->x && pGroup->ubSectorY == wp->y )
@@ -1026,7 +1052,8 @@ void CalculateNextMoveIntention( GROUP *pGroup )
 		switch( pGroup->ubMoveType )
 		{
 			case ONE_WAY:
-				if( !wp->next )
+				wp = wp->next;
+				if( !wp )
 				{ //No more waypoints, so we've reached the destination.
 					return;
 				}
@@ -1056,7 +1083,7 @@ void CalculateNextMoveIntention( GROUP *pGroup )
 					pGroup->ubNextWaypointID++;
 				break;
 			case ENDTOEND_BACKWARDS:
-				if( !pGroup->ubNextWaypointID )
+				if( pGroup->ubNextWaypointID == 0 )
 				{
 					pGroup->ubNextWaypointID++;
 					pGroup->ubMoveType = ENDTOEND_FORWARDS;
@@ -1744,31 +1771,20 @@ static void DelayEnemyGroupsIfPathsCross(GROUP& player_group)
 static void InitiateGroupMovementToNextSector(GROUP* pGroup)
 {
 	INT32 dx, dy;
-	INT32 i;
 	UINT8 ubDirection;
 	UINT8 ubSector;
 	WAYPOINT *wp;
 	UINT32 uiSleepMinutes = 0;
 
 	Assert( pGroup );
-	i = pGroup->ubNextWaypointID;
-	wp = pGroup->pWaypoints;
-	while( i-- )
-	{ //Traverse through the waypoint list to the next waypoint ID
-		Assert( wp );
-		wp = wp->next;
-	}
-	Assert( wp );
+	wp = GroupGetNextWaypoint( pGroup );
+
 	//We now have the correct waypoint.
 	//Analyse the group and determine which direction it will move from the current sector.
 	dx = wp->x - pGroup->ubSectorX;
 	dy = wp->y - pGroup->ubSectorY;
-	if( dx && dy )
-	{ //Can't move diagonally!
-		AssertMsg( 0, String("Attempting to move to waypoint in a diagonal direction from sector %d,%d to sector %d,%d",
-			pGroup->ubSectorX, pGroup->ubSectorY, wp->x, wp->y ) );
-	}
-	AssertMsg(dx != 0 || dy != 0, String("Attempting to move to waypoint %d, %d that you are already at!", wp->x, wp->y));
+	AssertMsg( dx == 0 || dy == 0, String("Attempting to move to waypoint in a diagonal direction from sector %d,%d to sector %d,%d", pGroup->ubSectorX, pGroup->ubSectorY, wp->x, wp->y) );
+	AssertMsg( dx != 0 || dy != 0, String("Attempting to move to waypoint %d,%d that you are already at!", wp->x, wp->y) );
 	//Clip dx/dy value so that the move is for only one sector.
 	if( dx >= 1 )
 	{
@@ -3127,7 +3143,7 @@ void UpdatePersistantGroupsFromOldSave( UINT32 uiSavedGameVersion )
 BOOLEAN GroupWillMoveThroughSector( GROUP *pGroup, UINT8 ubSectorX, UINT8 ubSectorY )
 {
 	WAYPOINT *wp;
-	INT32 i, dx, dy;
+	INT32 dx, dy;
 	UINT8 ubOrigX, ubOrigY;
 
 	Assert( pGroup );
@@ -3139,20 +3155,12 @@ BOOLEAN GroupWillMoveThroughSector( GROUP *pGroup, UINT8 ubSectorX, UINT8 ubSect
 	ubOrigX = pGroup->ubSectorX;
 	ubOrigY = pGroup->ubSectorY;
 
-	i = pGroup->ubNextWaypointID;
-	wp = pGroup->pWaypoints;
-
-	if( !wp )
+	if( pGroup->pWaypoints == NULL )
 	{ //This is a floating group!?
 		return FALSE;
 	}
-	while( i-- )
-	{ //Traverse through the waypoint list to the next waypoint ID
-		Assert( wp );
-		wp = wp->next;
-	}
-	Assert( wp );
 
+	wp = GroupGetNextWaypoint( pGroup );
 
 	while( wp )
 	{
@@ -3340,15 +3348,8 @@ void RandomizePatrolGroupLocation( GROUP *pGroup )
 	DeleteStrategicEvent( EVENT_GROUP_ARRIVAL, pGroup->ubGroupID );
 
 	//count the group's waypoints
-	wp = pGroup->pWaypoints;
-	while( wp )
-	{
-		if( wp->next )
-		{
-			ubMaxWaypointID++;
-		}
-		wp = wp->next;
-	}
+	ubMaxWaypointID = CountWaypoints( pGroup->pWaypoints ) - 1;
+
 	//double it (they go back and forth) -- it's using zero based indices, so you have to add one to get the number of actual
 	//waypoints in one direction.
 	ubTotalWaypoints = (UINT8)((ubMaxWaypointID) * 2);
@@ -3370,15 +3371,9 @@ void RandomizePatrolGroupLocation( GROUP *pGroup )
 	}
 
 	//Traverse through the waypoint list again, to extract the location they are at.
-	wp = pGroup->pWaypoints;
-	while( wp && ubChosen )
-	{
-		ubChosen--;
-		wp = wp->next;
-	}
+	wp = GetWaypointAtID( pGroup->pWaypoints, ubChosen );
 
-	//logic error if this fails.  We should have a null value for ubChosen
-	Assert( !ubChosen );
+	//logic error if this fails.
 	Assert( wp );
 
 	//Move the group to the location of this chosen waypoint.
