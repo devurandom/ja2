@@ -999,18 +999,24 @@ void CalculateNextMoveIntention( GROUP *pGroup )
 	}
 
 	//Determine if we are at a waypoint.
-	i = pGroup->ubNextWaypointID;
 	wp = pGroup->pWaypoints;
-	while( wp && i-- )
+	for( i = pGroup->ubNextWaypointID; i > 0 && wp != NULL; i-- )
 	{ //Traverse through the waypoint list to the next waypoint ID
 		wp = wp->next;
 	}
-	Assert( wp );
+	Assert( wp != NULL );
 	Assert( i == 0 );
 	if( wp == NULL || i != 0 )
 	{
-		std::stringstream ssError("Waypoint ID ");
-		ssError << pGroup->ubNextWaypointID << " not found, list exhausted after " << pGroup->ubNextWaypointID - i << " elements" << std::endl;
+		WAYPOINT *wp_tmp = pGroup->pWaypoints;
+		int wp_count = 0;
+		while (wp_tmp) {
+			wp_tmp = wp_tmp->next;
+			wp_count++;
+		}
+
+		std::stringstream ssError("Waypoint ");
+		ssError << pGroup->ubNextWaypointID << " not found in list of size " << wp_count << std::endl;
 		throw std::out_of_range(ssError.str());
 	}
 
