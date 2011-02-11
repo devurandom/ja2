@@ -285,6 +285,7 @@ HWFILE FileOpen(const char* const filename, const FileOpenFlags flags)
 	}
 
 	SGP::PODObj<SGPFile> file;
+	file->flags = SGPFILE_NONE;
 
 	int d;
 	if (flags & FILE_CREATE_ALWAYS)
