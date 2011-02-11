@@ -183,6 +183,7 @@ try
 		fhs = REALLOC(fhs, FileHeaderStruct, used_entries);
 	}
 
+	// FIXME: This produces an invalid read of size 8 in __strcasecmp_l_sse42 (glibc-2.13) in strings allocated by Slashify()
 	qsort(fhs, used_entries, sizeof(*fhs), CompareFileHeader);
 
 	lib->pFileHeader       = fhs;
