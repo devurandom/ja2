@@ -30,6 +30,8 @@ TILE_CACHE_ELEMENT*                   gpTileCache;
 static SGP::Vector<TILE_CACHE_STRUCT> gpTileCacheStructInfo;
 
 
+#define FILENAME_SIZE 255
+
 void InitTileCache(void)
 {
 	gpTileCache         = MALLOCN(TILE_CACHE_ELEMENT, guiMaxTileCacheSize);
@@ -54,10 +56,10 @@ void InitTileCache(void)
 		char const* const find_filename = find.Next();
 		if (find_filename == NULL) break;
 
-		char filename[150];
+		char filename[FILENAME_SIZE] = "";
 		sprintf(filename, "%s/" BASEDATADIR "/" TILECACHEDIR "/%s", data_path, find_filename);
 
-		TILE_CACHE_STRUCT tc;
+		TILE_CACHE_STRUCT tc = {0};
 		GetRootName(tc.zRootName, lengthof(tc.zRootName), filename);
 		tc.pStructureFileRef = LoadStructureFile(filename);
 

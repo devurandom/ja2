@@ -288,7 +288,7 @@ static int CompareFileNames(const void* key, const void* member)
 {
 	const char*             const sSearchKey     = (const char*)key;
 	const FileHeaderStruct* const TempFileHeader = (const FileHeaderStruct*)member;
-	char sFileNameWithPath[FILENAME_SIZE];
+	char sFileNameWithPath[FILENAME_SIZE] = "";
 
 	sprintf(sFileNameWithPath, "%s%s", g_current_lib_path, TempFileHeader->pFileName);
 

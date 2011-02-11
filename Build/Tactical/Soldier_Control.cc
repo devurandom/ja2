@@ -5955,7 +5955,7 @@ no_sub:
 		sprintf(basename, "%s%d", prefix, s->ubBattleSoundID);
 	}
 
-	SGPFILENAME filename;
+	SGPFILENAME filename = "";
 	sprintf(filename, BATTLESNDSDIR "/%s_%s.wav", basename, battle_snd->zName);
 
 	if (!FileExists(filename))

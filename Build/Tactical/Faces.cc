@@ -172,7 +172,7 @@ FACETYPE& InitFace(const ProfileID id, SOLDIERTYPE* const s, const UINT32 uiInit
 	// HERVE, PETER, ALBERTO and CARLO all use HERVE's portrait
 	INT32 const face_id = HERVE <= id && id <= CARLO ? HERVE : p.ubFaceIndex;
 
-	SGPFILENAME ImageFile;
+	SGPFILENAME ImageFile = "";
 	sprintf(ImageFile, face_file, face_id);
 	SGPVObject* const vo = AddVideoObjectFromFile(ImageFile);
 
