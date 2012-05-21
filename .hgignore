@@ -1,0 +1,6 @@
+# Backups
+.*~$
+# Buildsystem configuration
+^config.default$
+# Build directory
+^build$
