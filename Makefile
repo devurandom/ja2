@@ -214,6 +214,7 @@ SRCS += Build/Laptop/Mercs_Files.cc
 SRCS += Build/Laptop/Mercs_No_Account.cc
 SRCS += Build/Laptop/Personnel.cc
 SRCS += Build/Laptop/Store_Inventory.cc
+SRCS += Build/Local.cc
 SRCS += Build/LoadSaveEMail.cc
 SRCS += Build/LoadSaveTacticalStatusType.cc
 SRCS += Build/Loading_Screen.cc
