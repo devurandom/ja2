@@ -1326,8 +1326,31 @@ no_plate:
 		RestoreExternBackgroundRect(x, y, w, h);
 		INT16 sFontX;
 		INT16 sFontY;
-		FindFontCenterCoordinates(x, y, w, h, s.name, BLOCKFONT2, &sFontX, &sFontY);
-		MPrint(sFontX, sFontY, s.name);
+
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+        //        char buf4[256];
+        //        my__wchar2char( s.name, buf4);
+        // HACK  HACK  HACK to display correct nickname in list. dont know why it is saved wrong...
+            ProfileID const __pid = s.ubProfile;
+            //if (pid == NO_PROFILE) return;
+            MERCPROFILESTRUCT const& __p = GetProfile(__pid);
+            wchar_t const* __nickname;
+            if (s.uiStatusFlags & SOLDIER_VEHICLE)
+            {
+                VEHICLETYPE const& __v = GetVehicle(s.bVehicleID);
+                __nickname = pShortVehicleStrings[__v.ubVehicleType];
+                //name     = pVehicleStrings[     __v.ubVehicleType];
+            }
+            else
+            {
+                __nickname = __p.zNickname;
+                //name     = p.zName;
+            }
+            //FindFontCenterCoordinates(x, y, w, h, s.name, BLOCKFONT2, &sFontX, &sFontY);
+            FindFontCenterCoordinates(x, y, w, h, __nickname, BLOCKFONT2, &sFontX, &sFontY);
+		MPrint(sFontX, sFontY, __nickname);
+		//MPrint(sFontX, sFontY, s.name);
+		//MPrint(sFontX, sFontY, L"FOOBAR");
 	}
 
 	if (*dirty_level != DIRTYLEVEL0)
@@ -2352,7 +2375,8 @@ void RenderTEAMPanel(DirtyLevel const dirty_level)
 		INT32 const dy = INTERFACE_START_Y;
 		FOR_EACH_TEAM_PANEL_SLOT(i)
 		{
-			SOLDIERTYPE const* const s  = i->merc;
+			//SOLDIERTYPE const* const s  = i->merc;
+			SOLDIERTYPE * s  = i->merc; // HACK HACK HACK
 			if (s)
 			{
 				RenderSoldierFace(*s, dx + TM_FACE_X, dy + TM_FACE_Y);
@@ -2415,8 +2439,38 @@ void RenderTEAMPanel(DirtyLevel const dirty_level)
 				SetFontDestBuffer(guiSAVEBUFFER);
 				INT16 sFontX;
 				INT16 sFontY;
-				FindFontCenterCoordinates(dx + TM_NAME_X, dy + TM_NAME_Y, TM_NAME_WIDTH, TM_NAME_HEIGHT, s->name, BLOCKFONT2, &sFontX, &sFontY);
-				MPrint(sFontX, sFontY, s->name);
+
+				// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                //char buf4[256];
+                //my__wchar2char( s->name, buf4);
+				//MPrint(sFontX, sFontY, L"FOOBAR");
+				// HACK  HACK  HACK to display correct nickname in list. dont know why it is saved wrong...
+            ProfileID const __pid = s->ubProfile;
+            //if (pid == NO_PROFILE) return;
+            MERCPROFILESTRUCT const& __p = GetProfile(__pid);
+            wchar_t const* __nickname;
+            if (s->uiStatusFlags & SOLDIER_VEHICLE)
+            {
+                VEHICLETYPE const& __v = GetVehicle(s->bVehicleID);
+                __nickname = pShortVehicleStrings[__v.ubVehicleType];
+                //name     = pVehicleStrings[     __v.ubVehicleType];
+            }
+            else
+            {
+                __nickname = __p.zNickname;
+                //name     = p.zName;
+            }
+
+                //FindFontCenterCoordinates(dx + TM_NAME_X, dy + TM_NAME_Y, TM_NAME_WIDTH, TM_NAME_HEIGHT, s->name, BLOCKFONT2, &sFontX, &sFontY);
+                FindFontCenterCoordinates(dx + TM_NAME_X, dy + TM_NAME_Y, TM_NAME_WIDTH, TM_NAME_HEIGHT, __nickname, BLOCKFONT2, &sFontX, &sFontY);
+				MPrint(sFontX, sFontY, __nickname);
+                int _n = 0;
+                while ((__nickname[_n] != 0) || (_n>9)) {
+                    s->name[_n] = __nickname[_n];
+                    _n++;
+                }
+                s->name[_n]=0; // WHOA WHOA!!! this does it! s->name is not set correctly during loading!
+				//MPrint(sFontX, sFontY, s->name);
 				// reset to frame buffer!
 				SetFontDestBuffer(FRAME_BUFFER);
 			}

@@ -9,6 +9,8 @@
 #include "MemMan.h"
 #include "Debug.h"
 
+#include <android/log.h>
+
 
 static SGPImage* ReadRLEColMapImage(   HWFILE, UINT8 uiImgID, UINT8 uiColMap, UINT16 fContents);
 static SGPImage* ReadRLERGBImage(      HWFILE, UINT8 uiImgID, UINT8 uiColMap, UINT16 fContents);
@@ -32,13 +34,16 @@ SGPImage* LoadTGAFileToImage(char const* const filename, UINT16 const fContents)
 		case  2: return ReadUncompRGBImage(   hFile, uiImgID, uiColMap, fContents);
 		case  9: return ReadRLEColMapImage(   hFile, uiImgID, uiColMap, fContents);
 		case 10: return ReadRLERGBImage(      hFile, uiImgID, uiColMap, fContents);
-		default: throw std::runtime_error("Unsupported TGA format");
+		default: __android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Unsupported TGA format");
+				throw std::runtime_error("Unsupported TGA format");
+				break;
 	}
 }
 
 
 static SGPImage* ReadUncompColMapImage(HWFILE const hFile, UINT8 const uiImgID, UINT8 const uiColMap, UINT16 const fContents)
 {
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: TGA format 1 loading is unimplemented");
 	throw std::runtime_error("TGA format 1 loading is unimplemented");
 }
 
@@ -103,6 +108,7 @@ static SGPImage* ReadUncompRGBImage(HWFILE const f, UINT8 const uiImgID, UINT8 c
 		}
 		else
 		{
+			__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Failed to load TGA with unsupported colour depth");
 			throw std::runtime_error("Failed to load TGA with unsupported colour depth");
 		}
 		img->fFlags |= IMAGE_BITMAPDATA;
@@ -114,11 +120,13 @@ static SGPImage* ReadUncompRGBImage(HWFILE const f, UINT8 const uiImgID, UINT8 c
 
 static SGPImage* ReadRLEColMapImage(HWFILE const hFile, UINT8 const uiImgID, UINT8 const uiColMap, UINT16 const fContents)
 {
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: TGA format 9 loading is unimplemented");
 	throw std::runtime_error("TGA format 9 loading is unimplemented");
 }
 
 
 static SGPImage* ReadRLERGBImage(HWFILE const hFile, UINT8 const uiImgID, UINT8 const uiColMap, UINT16 const fContents)
 {
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: TGA format 10 loading is unimplemented");
 	throw std::runtime_error("TGA format 10 loading is unimplemented");
 }

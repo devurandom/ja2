@@ -30,6 +30,8 @@
 #	include "Soldier_Profile.h"
 #endif
 
+#include <android/log.h>
+
 
 #define		GIO_TITLE_FONT											FONT16ARIAL//FONT14ARIAL
 #define		GIO_TITLE_COLOR											FONT_MCOLOR_WHITE
@@ -270,6 +272,7 @@ static void MakeCheckBoxes(GUIButtonRef* const btns, size_t const n, INT16 const
 
 static void EnterGIOScreen()
 {
+    __android_log_print(ANDROID_LOG_INFO, "==TEST==", "*** New Game Screen entered ***");
 	if (gfGIOButtonsAllocated) return;
 
 	SetCurrentCursorFromDatabase(CURSOR_NORMAL);
@@ -356,26 +359,35 @@ static void EnterGIOScreen()
 
 static void ExitGIOScreen()
 {
+    __android_log_print(ANDROID_LOG_INFO, "==TEST==", "*** New Game Screen is exiting... ***");
 	if (!gfGIOButtonsAllocated) return;
 	gfGIOButtonsAllocated = FALSE;
 
 	// Delete the main options screen background.
 	DeleteVideoObject(guiGIOMainBackGroundImage);
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "*** DeleteVideoObject(guiGIOMainBackGroundImage); OK ***");
 
 	RemoveButton(guiGIOCancelButton);
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "*** RemoveButton(guiGIOCancelButton); OK ***");
 	RemoveButton(guiGIODoneButton);
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "*** RemoveButton(guiGIODoneButton); OK ***");
 
 	UnloadButtonImage(giGIOCancelBtnImage);
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "*** UnloadButtonImage(giGIOCancelBtnImage); OK ***");
 	UnloadButtonImage(giGIODoneBtnImage);
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "*** UnloadButtonImage(giGIODoneBtnImage); OK ***");
 
 	// Check box to toggle difficulty settings
 	FOR_EACH(GUIButtonRef, i, guiDifficultySettingsToggles) RemoveButton(*i);
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "*** FOR_EACH(GUIButtonRef, i, guiDifficultySettingsToggles) RemoveButton(*i); OK ***");
 
 	// Check box to toggle game settings (realistic, sci fi)
 	FOR_EACH(GUIButtonRef, i, guiGameStyleToggles) RemoveButton(*i);
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "*** FOR_EACH(GUIButtonRef, i, guiGameStyleToggles) RemoveButton(*i); OK ***");
 
 	// Check box to toggle gun options
 	FOR_EACH(GUIButtonRef, i, guiGunOptionToggles) RemoveButton(*i);
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "*** FOR_EACH(GUIButtonRef, i, guiGunOptionToggles) RemoveButton(*i); OK ***");
 
 #if 0 // JA2Gold: no more timed turns setting
 	// Remove the timed turns toggle.
@@ -384,9 +396,11 @@ static void ExitGIOScreen()
 
 	// JA2Gold: Remove iron man buttons.
 	FOR_EACH(GUIButtonRef, i, guiGameSaveToggles) RemoveButton(*i);
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "*** FOR_EACH(GUIButtonRef, i, guiGameSaveToggles) RemoveButton(*i); OK ***");
 
 	// If we are starting the game stop playing the music.
 	if (gubGameOptionScreenHandler == GIO_EXIT) SetMusicMode(MUSIC_NONE);
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "*** if (gubGameOptionScreenHandler == GIO_EXIT) SetMusicMode(MUSIC_NONE); OK ***");
 
 	gfGIOScreenExit  = FALSE;
 	gfGIOScreenEntry = TRUE;
@@ -748,6 +762,7 @@ static void RestoreGIOButtonBackGrounds(void)
 
 static void DoneFadeOutForExitGameInitOptionScreen(void)
 {
+    __android_log_print(ANDROID_LOG_INFO, "==TEST==", "*** New Game Screen called DoneFadeOutForExitGameInitOptionScreen ***");
 	// loop through and get the status of all the buttons
 	gGameOptions.fGunNut = GetCurrentGunButtonSetting();
 	gGameOptions.fSciFi = GetCurrentGameStyleButtonSetting();
@@ -774,7 +789,9 @@ static void DoneFadeOutForExitGameInitOptionScreen(void)
 	}
 	else
 #endif
+    __android_log_print(ANDROID_LOG_INFO, "==TEST==", "*** New Game Screen called SetIntroType(INTRO_BEGINING); ***");
 		SetIntroType(INTRO_BEGINING);
+    __android_log_print(ANDROID_LOG_INFO, "==TEST==", "*** SetIntroType(INTRO_BEGINING); OK ***");
 
 	ExitGIOScreen();
 

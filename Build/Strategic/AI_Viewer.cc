@@ -1825,8 +1825,14 @@ static void PrintDetailedEnemiesInSectorInfo(INT32 iScreenX, INT32 iScreenY, UIN
 			if ( ( pGroup->ubSectorX == ubSectorX ) && ( pGroup->ubSectorY == ubSectorY ) )
 			{
 				Assert( pGroup->pEnemyGroup->ubIntention < NUM_ENEMY_INTENTIONS );
-
-				swprintf(wString, lengthof(wString), L"Group %c: %ls", 'A' + ubGroupCnt, gwGroupTypeString[pGroup->pEnemyGroup->ubIntention]);
+                // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                            char buf1[256];
+                            //char buf2[256];
+                            //char buf3[256];
+                            //char buf4[256];
+                            my__wchar2char( gwGroupTypeString[pGroup->pEnemyGroup->ubIntention], buf1);
+				//swprintf(wString, lengthof(wString), L"Group %c: %ls", 'A' + ubGroupCnt, gwGroupTypeString[pGroup->pEnemyGroup->ubIntention]);
+				swprintf(wString, lengthof(wString), L"Group %c: %s", 'A' + ubGroupCnt, buf1);
 
 				switch ( pGroup->pEnemyGroup->ubIntention )
 				{

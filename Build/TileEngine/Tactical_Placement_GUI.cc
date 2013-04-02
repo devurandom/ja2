@@ -394,7 +394,15 @@ static void RenderTacticalPlacementGUI()
 		SetFontAttributes(BLOCKFONT, FONT_BEIGE);
 		wchar_t str[128];
 		GetSectorIDString(gubPBSectorX, gubPBSectorY, gubPBSectorZ, str, lengthof(str), TRUE);
-		mprintf(120, 335, L"%ls %ls -- %ls...", gpStrategicString[STR_TP_SECTOR], str, gpStrategicString[STR_TP_CHOOSEENTRYPOSITIONS]);
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[512];
+            char buf2[512];
+            char buf3[512];
+            my__wchar2char( gpStrategicString[STR_TP_SECTOR], buf1);
+            my__wchar2char( str, buf2);
+            my__wchar2char( gpStrategicString[STR_TP_CHOOSEENTRYPOSITIONS], buf3);
+		mprintf(120, 335, L"%s %s -- %s...", buf1, buf2, buf3);
+		//mprintf(120, 335, L"%ls %ls -- %ls...", gpStrategicString[STR_TP_SECTOR], str, gpStrategicString[STR_TP_CHOOSEENTRYPOSITIONS]);
 
 		// Shade out the part of the tactical map that isn't considered placable.
 		BlitBufferToBuffer(buf, guiSAVEBUFFER, 0, 320, g_screen_width, 160);

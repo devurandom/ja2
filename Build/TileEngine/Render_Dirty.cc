@@ -12,7 +12,7 @@
 #include <stdarg.h>
 #include "MemMan.h"
 #include "Debug.h"
-
+#include <android/log.h>
 
 #define BACKGROUND_BUFFERS 500
 
@@ -108,7 +108,7 @@ static BACKGROUND_SAVE* GetFreeBackgroundBuffer(void)
 	{
 		return &gBackSaves[guiNumBackSaves++];
 	}
-
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Out of background save slots");
 	throw std::runtime_error("Out of background save slots");
 }
 
@@ -418,10 +418,35 @@ void GDirtyPrint(INT16 const x, INT16 const y, wchar_t const* const str) // XXX 
 void GDirtyPrintF(INT16 const x, INT16 const y, wchar_t const* const fmt, ...)
 {
 	wchar_t	str[512];
+#ifdef WORKING_VSPRINTF
 	va_list ap;
 	va_start(ap, fmt);
 	vswprintf(str, lengthof(str), fmt, ap);
 	va_end(ap);
+#else
+    char cstr[2048];
+	char cfmt[2048];
+	for (int wi=0, cj=0; wi<2048; wi++, cj++) {
+	    cfmt[cj] = (char) fmt[wi];
+	    if (cfmt[cj] == 0) wi = 2048;
+	}
+    va_list ap;
+	va_start(ap, fmt);
+	//vswprintf(str, lengthof(str), fmt, ap); // does this buddy break it?! YES IT DOES
+	vsprintf(cstr, cfmt, ap);
+	//custom_vswprintf(str, lengthof(str), fmt, ap);
+	va_end(ap);
+	//str[0] = L's';
+	//str[1] = L'h';
+	//str[2] = L'i';
+	//str[3] = L't';
+	size_t wchar_count = 0;
+	for (int i=0; i<2048; i++) {
+	    str[i] = cstr[i];
+	    wchar_count++;
+	    if (str[i]==0) i=2048;
+	}
+#endif
 	GDirtyPrint(x, y, str);
 }
 
@@ -435,12 +460,38 @@ void GPrintDirty(INT16 const x, INT16 const y, wchar_t const* const str) // XXX 
 
 void GPrintDirtyF(INT16 const x, INT16 const y, wchar_t const* const fmt, ...)
 {
-	wchar_t	str[512];
+    wchar_t	str[512];
+#ifdef WORKING_VSPRINTF
 	va_list ap;
 	va_start(ap, fmt);
 	vswprintf(str, lengthof(str), fmt, ap);
 	va_end(ap);
+#else
+    char cstr[2048];
+	char cfmt[2048];
+	for (int wi=0, cj=0; wi<2048; wi++, cj++) {
+	    cfmt[cj] = (char) fmt[wi];
+	    if (cfmt[cj] == 0) wi = 2048;
+	}
+    va_list ap;
+	va_start(ap, fmt);
+	//vswprintf(str, lengthof(str), fmt, ap); // does this buddy break it?! YES IT DOES
+	vsprintf(cstr, cfmt, ap);
+	//custom_vswprintf(str, lengthof(str), fmt, ap);
+	va_end(ap);
+	//str[0] = L's';
+	//str[1] = L'h';
+	//str[2] = L'i';
+	//str[3] = L't';
+	size_t wchar_count = 0;
+	for (int i=0; i<2048; i++) {
+	    str[i] = cstr[i];
+	    wchar_count++;
+	    if (str[i]==0) i=2048;
+	}
+#endif
 	GDirtyPrint(x, y, str);
+
 }
 
 
@@ -460,10 +511,35 @@ void GPrintInvalidate(INT16 const x, INT16 const y, wchar_t const* const str)
 void GPrintInvalidateF(INT16 const x, INT16 const y, wchar_t const* const fmt, ...)
 {
 	wchar_t	str[512];
+#ifdef WORKING_VSPRINTF
 	va_list ap;
 	va_start(ap, fmt);
 	vswprintf(str, lengthof(str), fmt, ap);
 	va_end(ap);
+#else
+    char cstr[2048];
+	char cfmt[2048];
+	for (int wi=0, cj=0; wi<2048; wi++, cj++) {
+	    cfmt[cj] = (char) fmt[wi];
+	    if (cfmt[cj] == 0) wi = 2048;
+	}
+    va_list ap;
+	va_start(ap, fmt);
+	//vswprintf(str, lengthof(str), fmt, ap); // does this buddy break it?! YES IT DOES
+	vsprintf(cstr, cfmt, ap);
+	//custom_vswprintf(str, lengthof(str), fmt, ap);
+	va_end(ap);
+	//str[0] = L's';
+	//str[1] = L'h';
+	//str[2] = L'i';
+	//str[3] = L't';
+	size_t wchar_count = 0;
+	for (int i=0; i<2048; i++) {
+	    str[i] = cstr[i];
+	    wchar_count++;
+	    if (str[i]==0) i=2048;
+	}
+#endif
 	GPrintInvalidate(x, y, str);
 }
 
@@ -696,10 +772,38 @@ void EnableVideoOverlay(const BOOLEAN fEnable, VIDEO_OVERLAY* const v)
 void SetVideoOverlayTextF(VIDEO_OVERLAY* const v, const wchar_t* Fmt, ...)
 {
 	if (!v) return;
-	va_list Arg;
+
+#ifdef WORKING_VSPRINTF
+    va_list Arg;
 	va_start(Arg, Fmt);
 	vswprintf(v->zText, lengthof(v->zText), Fmt, Arg);
 	va_end(Arg);
+#else
+    char cstr[2048];
+	char cfmt[2048];
+	for (int wi=0, cj=0; wi<2048; wi++, cj++) {
+	    cfmt[cj] = (char) Fmt[wi];
+	    if (cfmt[cj] == 0) wi = 2048;
+	}
+    va_list ap;
+	va_start(ap, Fmt);
+	//vswprintf(str, lengthof(str), fmt, ap); // does this buddy break it?! YES IT DOES
+	vsprintf(cstr, cfmt, ap);
+	//custom_vswprintf(str, lengthof(str), fmt, ap);
+	va_end(ap);
+	//str[0] = L's';
+	//str[1] = L'h';
+	//str[2] = L'i';
+	//str[3] = L't';
+	size_t wchar_count = 0;
+	for (int i=0; i<2048; i++) {
+	    v->zText[i] = cstr[i];
+	    wchar_count++;
+	    if (v->zText[i]==0) i=2048;
+	}
+#endif
+
+
 }
 
 

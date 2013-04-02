@@ -24,8 +24,9 @@ void InitJA2SplashScreen(void)
 	InitializeJA2Clock();
 
 	STRING512 DataDir;
-	sprintf(DataDir, "%s/" BASEDATADIR, GetExecutableDirectory());
-	SetFileManCurrentDirectory(DataDir);
+	//sprintf(DataDir, "%s/" BASEDATADIR, GetExecutableDirectory());
+	//SetFileManCurrentDirectory(DataDir);
+	SetFileManCurrentDirectory("/sdcard/app-data/com.opensourced.ja2");
 
 	InitializeFileDatabase(gGameLibaries, lengthof(gGameLibaries));
 

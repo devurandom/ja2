@@ -614,7 +614,7 @@ FDLG_LIST* AddToFDlgList(FDLG_LIST* const list, char const* const filename)
 		if (strcasecmp(i->filename, filename) > 0) break;
 	}
 	FDLG_LIST* const n = MALLOC(FDLG_LIST);
-	strlcpy(n->filename, filename, lengthof(n->filename));
+	my_strlcpy(n->filename, filename, lengthof(n->filename));
 	n->pPrev = prev;
 	n->pNext = i;
 	if (i)    i->pPrev    = n;

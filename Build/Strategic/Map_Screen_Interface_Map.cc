@@ -1156,7 +1156,13 @@ void PlotPathForCharacter(SOLDIERTYPE& s, INT16 const x, INT16 const y, bool con
 		wchar_t const* const who =
 			s.bAssignment >= ON_DUTY ? s.name :
 			pLongAssignmentStrings[s.bAssignment];
-		MapScreenMessage(FONT_MCOLOR_DKRED, MSG_INTERFACE, L"%ls %ls", who, gsUndergroundString);
+                // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[256];
+                    char buf2[256];
+                    my__wchar2char( who, buf1);
+                    my__wchar2char( gsUndergroundString, buf2);
+		MapScreenMessage(FONT_MCOLOR_DKRED, MSG_INTERFACE, L"%s %s", buf1, buf2);
+		//MapScreenMessage(FONT_MCOLOR_DKRED, MSG_INTERFACE, L"%ls %ls", who, gsUndergroundString);
 		return;
 	}
 
@@ -3134,7 +3140,13 @@ void DisplayDistancesForHelicopter()
 	INT32 iTime = GetPathTravelTimeDuringPlotting(pTempHelicopterPath);
 	// add travel time for any prior path segments (stored in the helicopter's mercpath, but waypoints aren't built)
 	iTime += GetPathTravelTimeDuringPlotting(GetHelicopter().pMercPath);
-	swprintf(sString, lengthof(sString), L"%d%ls %d%ls", iTime / 60, gsTimeStrings[0], iTime % 60, gsTimeStrings[1]);
+	// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[256];
+                    char buf2[256];
+                    my__wchar2char( gsTimeStrings[0], buf1);
+                    my__wchar2char( gsTimeStrings[1], buf2);
+	swprintf(sString, lengthof(sString), L"%d%s %d%s", iTime / 60, buf1, iTime % 60, buf2);
+	//swprintf(sString, lengthof(sString), L"%d%ls %d%ls", iTime / 60, gsTimeStrings[0], iTime % 60, gsTimeStrings[1]);
 	FindFontRightCoordinates(x, y, w, 0, sString, MAP_FONT, &sX, &sY);
 	MPrint(sX, y, sString);
 	y += h;
@@ -3475,7 +3487,13 @@ static void BlitMineText(UINT8 const mine_idx, INT16 const sMapX, INT16 const sM
 	wchar_t     buf[32];
 
 	// display associated town name, followed by "mine"
-	swprintf(buf, lengthof(buf), L"%ls %ls", pTownNames[GetTownAssociatedWithMine(mine_idx)], pwMineStrings[0]);
+	// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[256];
+                    char buf2[256];
+                    my__wchar2char( pTownNames[GetTownAssociatedWithMine(mine_idx)], buf1);
+                    my__wchar2char( pwMineStrings[0], buf2);
+	swprintf(buf, lengthof(buf), L"%s %s", buf1, buf2);
+	//swprintf(buf, lengthof(buf), L"%ls %ls", pTownNames[GetTownAssociatedWithMine(mine_idx)], pwMineStrings[0]);
 	PrintStringCenteredBoxed(x, y, buf);
 	y += h;
 
@@ -3636,7 +3654,13 @@ static void DisplayLevelString(void)
 
 	SetFontDestBuffer(guiSAVEBUFFER, MAP_VIEW_START_X, MAP_VIEW_START_Y, MAP_VIEW_START_X + MAP_VIEW_WIDTH + MAP_GRID_X, MAP_VIEW_START_Y + MAP_VIEW_HEIGHT + 7);
 	SetFontAttributes(MAP_FONT, MAP_INDEX_COLOR);
-	mprintf(MAP_LEVEL_STRING_X, MAP_LEVEL_STRING_Y, L"%ls %d", sMapLevelString, iCurrentMapSectorZ);
+	// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[256];
+                    //char buf2[256];
+                    my__wchar2char( sMapLevelString, buf1);
+                    //my__wchar2char( pwMineStrings[0], buf2);
+	mprintf(MAP_LEVEL_STRING_X, MAP_LEVEL_STRING_Y, L"%s %d", buf1, iCurrentMapSectorZ);
+	//mprintf(MAP_LEVEL_STRING_X, MAP_LEVEL_STRING_Y, L"%ls %d", sMapLevelString, iCurrentMapSectorZ);
 	SetFontDestBuffer(FRAME_BUFFER);
 }
 
@@ -4151,12 +4175,24 @@ static void DrawTownMilitiaName()
 	INT16                sY;
 
 	// get the name for the current militia town
-	swprintf(buf, lengthof(buf), L"%ls %ls", town, pMilitiaString[0]);
+	// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[256];
+                    char buf2[256];
+                    my__wchar2char( town, buf1);
+                    my__wchar2char( pMilitiaString[0], buf2);
+	swprintf(buf, lengthof(buf), L"%s %s", buf1, buf2);
+	//swprintf(buf, lengthof(buf), L"%ls %ls", town, pMilitiaString[0]);
 	FindFontCenterCoordinates(x, y + MILITIA_BOX_TEXT_OFFSET_Y, w, MILITIA_BOX_TEXT_TITLE_HEIGHT, buf, FONT10ARIAL, &sX, &sY);
 	MPrint(sX, sY, buf);
 
 	// might as well show the unassigned string
-	swprintf(buf, lengthof(buf), L"%ls %ls", town, pMilitiaString[1]);
+	// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1b[256];
+                    char buf2b[256];
+                    my__wchar2char( town, buf1b);
+                    my__wchar2char( pMilitiaString[1], buf2b);
+	swprintf(buf, lengthof(buf), L"%s %s", buf1b, buf2b);
+	//swprintf(buf, lengthof(buf), L"%ls %ls", town, pMilitiaString[1]);
 	FindFontCenterCoordinates(x, y + MILITIA_BOX_UNASSIGNED_TEXT_OFFSET_Y, w, GetFontHeight(FONT10ARIAL), buf, FONT10ARIAL, &sX, &sY);
 	MPrint(sX, sY, buf);
 }

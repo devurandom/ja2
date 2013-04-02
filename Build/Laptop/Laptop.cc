@@ -2795,7 +2795,8 @@ void PrintNumberOnTeam(void)
 		++usPosX;
 		++usPosY;
 	}
-	mprintf(usPosX, usPosY, L"%ls %d", pPersonnelString, iCounter);
+	//mprintf(usPosX, usPosY, L"%ls %d", pPersonnelString, iCounter);
+	mprintf(usPosX, usPosY, L"%s %d", "Mercs:", iCounter);
 
 	SetFontShadow(DEFAULT_SHADOW);
 }
@@ -3029,7 +3030,13 @@ void RenderWWWProgramTitleBar(void)
 	else
 	{
 		const INT32 iIndex = guiCurrentLaptopMode - LAPTOP_MODE_WWW-1;
-		mprintf(140, 33, L"%ls  -  %ls", pWebTitle, pWebPagesTitles[iIndex]);
+                    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[512];
+                    char buf2[512];
+                    my__wchar2char(pWebTitle, buf1);
+                    my__wchar2char(pWebPagesTitles[iIndex], buf2);
+		mprintf(140, 33, L"%s  -  %s", buf1, buf2);
+		//mprintf(140, 33, L"%ls  -  %ls", pWebTitle, pWebPagesTitles[iIndex]);
 	}
 
 	BlitTitleBarIcons();

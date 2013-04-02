@@ -223,8 +223,9 @@ void RenderMapScreenInterfaceBottom( void )
 
 		if (GetSectorFlagStatus(sSelMapX, sSelMapY, iCurrentMapSectorZ, SF_ALREADY_VISITED))
 		{
-			GetMapFileName(sSelMapX, sSelMapY, iCurrentMapSectorZ, bFilename, TRUE);
-			LoadRadarScreenBitmap( bFilename );
+			// MADE ARM SPECIFIC CHANGE HERE
+			GetMapFileName(sSelMapX, sSelMapY, iCurrentMapSectorZ, (char*)bFilename, TRUE);
+			LoadRadarScreenBitmap( (char*)bFilename );
 		}
 		else
 		{

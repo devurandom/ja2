@@ -743,7 +743,14 @@ static void DrawEmailSummary(INT32 y, const Email* e)
 	MPrint(SENDER_X,  y + 4, pSenderNameList[e->ubSender]);
 
 	// draw date of message being displayed in mail viewer
-	mprintf(DATE_X, y + 4, L"%ls %d", pDayStrings, e->iDate / (24 * 60));
+
+	    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+		char buf1[256];
+		//char buf2[256];
+		my__wchar2char(pDayStrings, buf1);
+		//my__wchar2char(VideoConfercingText[AIM_MEMBER_WITH_MEDICAL], buf2);
+	mprintf(DATE_X, y + 4, L"%s %d", buf1, e->iDate / (24 * 60));
+	//mprintf(DATE_X, y + 4, L"%ls %d", pDayStrings, e->iDate / (24 * 60));
 }
 
 
@@ -1909,7 +1916,13 @@ static void HandleIMPCharProfileResultsMessage(void)
 		if (i == 0)
 		{
 			wchar_t zTemp[512];
-			swprintf(zTemp, lengthof(zTemp), L" %ls", imp.zName);
+			// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+		char buf1[512];
+		//char buf2[256];
+		my__wchar2char(imp.zName, buf1);
+		//my__wchar2char(VideoConfercingText[AIM_MEMBER_WITH_MEDICAL], buf2);
+			//swprintf(zTemp, lengthof(zTemp), L" %ls", buf1);
+			swprintf(zTemp, lengthof(zTemp), L" %s", buf1);
 			wcscat(pString, zTemp);
 		}
 

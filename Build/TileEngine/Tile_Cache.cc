@@ -13,6 +13,13 @@
 #include "MemMan.h"
 #include "Vector.h"
 
+#include <fstream>
+bool fexists(const char *filename)
+{
+  std::ifstream ifile(filename);
+  return ifile;
+}
+
 
 struct TILE_CACHE_STRUCT
 {
@@ -47,17 +54,139 @@ void InitTileCache(void)
 	// Look for JSD files in the tile cache directory and load any we find
 	const char* const data_path = GetBinDataPath();
 	char              jsd_file_pattern[512];
+    // FindFiles is broken on Android - for whatever reason
+    // we have to get our list of files manually.
+    // These are all files in my tilecache folder in ja2 v1.13
+    // probably more than required, but better than forgetting one
+    // length is 109
+    char *filelist[] = {"c_dead1.jsd",
+                        "c_dead1_nb.jsd",
+                        "cp_dead1.jsd",
+                        "cp_dead1_nb.jsd",
+                        "ct_dead1.jsd",
+                        "ct_dead1_nb.jsd",
+                        "ct_dead.jsd",
+                        "ct_dead_nb.jsd",
+                        "cw_dead1.jsd",
+                        "cw_dead1_nb.jsd",
+                        "f_d_bck.jsd",
+                        "f_d_bck_nb.jsd",
+                        "f_d_dhd.jsd",
+                        "f_d_dhd_nb.jsd",
+                        "f_dead.jsd",
+                        "f_dead_nb.jsd",
+                        "f_d_fallf.jsd",
+                        "f_d_fallf_nb.jsd",
+                        "f_d_fall.jsd",
+                        "f_d_fall_nb.jsd",
+                        "f_d_fwd.jsd",
+                        "f_d_fwd_nb.jsd",
+                        "f_d_jfk.jsd",
+                        "f_d_jfk_nb.jsd",
+                        "f_d_prn.jsd",
+                        "f_d_prn_nb.jsd",
+                        "f_d_wtr.jsd",
+                        "f_d_wtr_nb.jsd",
+                        "ft_dead1.jsd",
+                        "ft_dead1_nb.jsd",
+                        "ft_dead2.jsd",
+                        "ft_dead2_nb.jsd",
+                        "h_dead1.jsd",
+                        "h_dead1_nb.jsd",
+                        "h_dead2.jsd",
+                        "h_dead2_nb.jsd",
+                        "hm_wrek.jsd",
+                        "ic_wrek.jsd",
+                        "i_dead1.jsd",
+                        "i_dead1_nb.jsd",
+                        "j_dead.jsd",
+                        "k_dead1.jsd",
+                        "k_dead1_nb.jsd",
+                        "k_dead2.jsd",
+                        "k_dead2_nb.jsd",
+                        "l_dead1.jsd",
+                        "l_dead1_nb.jsd",
+                        "m_bck.jsd",
+                        "m_bck_nb.jsd",
+                        "m_d_bck.jsd",
+                        "m_d_bck_nb.jsd",
+                        "m_d_dhd.jsd",
+                        "m_d_dhd_nb.jsd",
+                        "m_dead1.jsd",
+                        "m_dead1_nb.jsd",
+                        "m_dead2.jsd",
+                        "m_dead2_nb.jsd",
+                        "m_d_fallf.jsd",
+                        "m_d_fallf_nb.jsd",
+                        "m_d_fall.jsd",
+                        "m_d_fall_nb.jsd",
+                        "m_d_fwd.jsd",
+                        "m_d_fwd_nb.jsd",
+                        "m_d_jfk.jsd",
+                        "m_d_jfk_nb.jsd",
+                        "m_d_prn.jsd",
+                        "m_d_prn_nb.jsd",
+                        "m_d_wtr.jsd",
+                        "m_d_wtr_nb.jsd",
+                        "m_jfk.jsd",
+                        "m_jfk_nb.jsd",
+                        "mn_dead1.jsd",
+                        "mn_dead1_nb.jsd",
+                        "mn_dead2.jsd",
+                        "mn_dead2_nb.jsd",
+                        "p_decomp2.jsd",
+                        "q_dead.jsd",
+                        "q_dead_nb.jsd",
+                        "qn_dead.jsd",
+                        "s_burnt.jsd",
+                        "s_d_bck.jsd",
+                        "s_d_bck_nb.jsd",
+                        "s_d_dhd.jsd",
+                        "s_d_dhd_nb.jsd",
+                        "s_dead1.jsd",
+                        "s_dead1_nb.jsd",
+                        "s_dead2.jsd",
+                        "s_dead2_nb.jsd",
+                        "s_d_fallf.jsd",
+                        "s_d_fallf_nb.jsd",
+                        "s_d_fall.jsd",
+                        "s_d_fall_nb.jsd",
+                        "s_d_fwd.jsd",
+                        "s_d_fwd_nb.jsd",
+                        "s_d_jfk.jsd",
+                        "s_d_jfk_nb.jsd",
+                        "s_d_prn.jsd",
+                        "s_d_prn_nb.jsd",
+                        "s_d_wtr.jsd",
+                        "s_d_wtr_nb.jsd",
+                        "s_expld.jsd",
+                        "tk2_wrek.jsd",
+                        "tk2_wrek_nb.jsd",
+                        "tk_wrek.jsd",
+                        "tk_wrek_nb.jsd",
+                        "w_dead1.jsd",
+                        "w_dead1_nb.jsd",
+                        "w_dead2.jsd",
+                        "w_dead2_nb.jsd"};
+
 	snprintf(jsd_file_pattern, lengthof(jsd_file_pattern), "%s/" BASEDATADIR "/" TILECACHEDIR "/*.jsd", data_path);
 
+	int manual_filelist_counter = 0;
 	// Loop through and set filenames
 	SGP::FindFiles find(jsd_file_pattern);
 	for (;;)
 	{
-		char const* const find_filename = find.Next();
-		if (find_filename == NULL) break;
+//		char const* const find_filename = find.Next();
+//		if (find_filename == NULL) break;
+        if (manual_filelist_counter > 108) break;
+        char const* const find_filename = filelist[manual_filelist_counter];
+		manual_filelist_counter++;
+
 
 		char filename[FILENAME_SIZE] = "";
 		sprintf(filename, "%s/" BASEDATADIR "/" TILECACHEDIR "/%s", data_path, find_filename);
+
+        if (!fexists(filename)) continue; // avoid errors
 
 		TILE_CACHE_STRUCT tc = {0};
 		GetRootName(tc.zRootName, lengthof(tc.zRootName), filename);

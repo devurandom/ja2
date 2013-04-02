@@ -1149,8 +1149,15 @@ static void DisplayCurrentSector(void)
 	CHAR16 sString[ 32 ];
 	INT16 sX, sY;
 
-
-	swprintf( sString, lengthof(sString), L"%ls%ls%ls", pMapVertIndex[ sSelMapY ], pMapHortIndex[ sSelMapX ], pMapDepthIndex[ iCurrentMapSectorZ ] );
+    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[128];
+                    char buf2[128];
+                    char buf3[128];
+                    my__wchar2char( pMapVertIndex[ sSelMapY ], buf1);
+                    my__wchar2char( pMapHortIndex[ sSelMapX ], buf2);
+                    my__wchar2char( pMapDepthIndex[ iCurrentMapSectorZ ], buf3);
+	swprintf( sString, lengthof(sString), L"%s%s%s", buf1, buf2, buf3 );
+	//swprintf( sString, lengthof(sString), L"%ls%ls%ls", pMapVertIndex[ sSelMapY ], pMapHortIndex[ sSelMapX ], pMapDepthIndex[ iCurrentMapSectorZ ] );
 
 	SetFontAttributes(COMPFONT, 183);
 	SetFontDestBuffer(guiSAVEBUFFER);

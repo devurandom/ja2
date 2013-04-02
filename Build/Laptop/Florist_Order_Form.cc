@@ -674,8 +674,13 @@ static void DisplayFlowerDynamicItems(void)
 	//else its the 'when it gets there' delivery
 	else
 		guiFlowerPrice += usPrice + FlowerOrderLocations[ gubCurrentlySelectedFlowerLocation ].ubWhenItGetsThereCost;
-
-	swprintf(sTemp, lengthof(sTemp), L"$%d.00 %ls", guiFlowerPrice, pMessageStrings[MSG_USDOLLAR_ABBREVIATION]);
+    					// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[512];
+                    //char buf2[256];
+                    my__wchar2char(pMessageStrings[MSG_USDOLLAR_ABBREVIATION], buf1);
+                    //my__wchar2char(VideoConfercingText[AIM_MEMBER_WITH_MEDICAL], buf2);
+	//swprintf(sTemp, lengthof(sTemp), L"$%d.00 %ls", guiFlowerPrice, buf1);
+	swprintf(sTemp, lengthof(sTemp), L"$%d.00 %s", guiFlowerPrice, buf1);
 	DrawTextToScreen(sTemp, usPosX, FLOWER_ORDER_BOUQUET_NAME_Y, 0, FLOWER_ORDEER_SMALL_FONT, FLOWER_ORDEER_SMALL_COLOR, FONT_MCOLOR_BLACK, LEFT_JUSTIFIED);
 }
 

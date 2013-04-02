@@ -307,7 +307,13 @@ static void RenderVoiceIndex(void)
 	INT16 sX, sY;
 
 	// render the voice index value on the the blank portrait
-	swprintf(sString, lengthof(sString), L"%ls %d", pIMPVoicesStrings, iCurrentVoices + 1);
+	                    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[512];
+                    //char buf2[512];
+                    my__wchar2char(pIMPVoicesStrings, buf1);
+                    //my__wchar2char(pHistoryHeaders[2], buf2);
+	//swprintf(sString, lengthof(sString), L"%ls %d", buf1, iCurrentVoices + 1);
+	swprintf(sString, lengthof(sString), L"%s %d", buf1, iCurrentVoices + 1);
 	FindFontCenterCoordinates( 290 + LAPTOP_UL_X, 0, 100, 0, sString, FONT12ARIAL, &sX, &sY );
 	SetFontAttributes(FONT12ARIAL, FONT_WHITE);
 	MPrint(sX, 320, sString);

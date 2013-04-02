@@ -841,17 +841,41 @@ static BOOLEAN DisplaySaveGameEntry(INT8 const entry_idx)
 		{ // The user is LOADING and holding down the CTRL key, display the additional info
 			// Create a string for difficulty level
 			wchar_t difficulty[256];
-			swprintf(difficulty, lengthof(difficulty), L"%ls %ls", gzGIOScreenText[GIO_EASY_TEXT + header.sInitialGameOptions.ubDifficultyLevel - 1], zSaveLoadText[SLG_DIFF]);
+			 // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                            char buf1[256];
+                            char buf2[256];
+                            //char buf3[256];
+                            my__wchar2char( gzGIOScreenText[GIO_EASY_TEXT + header.sInitialGameOptions.ubDifficultyLevel - 1], buf1);
+                            my__wchar2char(zSaveLoadText[SLG_DIFF], buf2);
+                            //my__wchar2char(gpStrategicString[STR_PB_DAYS_ABBREVIATION], buf3);
+			//swprintf(difficulty, lengthof(difficulty), L"%ls %ls", gzGIOScreenText[GIO_EASY_TEXT + header.sInitialGameOptions.ubDifficultyLevel - 1], zSaveLoadText[SLG_DIFF]);
+			swprintf(difficulty, lengthof(difficulty), L"%s %s", buf1, buf2);
 
 			// Make a string containing the extended options
 			wchar_t options[256];
-			swprintf(options, lengthof(options), L"%20ls     %22ls     %22ls     %22ls",
-				difficulty,
+			 // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                            char buf1x[256];
+                            char buf2x[256];
+                            char buf3[256];
+                            char buf4[256];
+                            my__wchar2char( difficulty, buf1x);
+                            my__wchar2char(header.sInitialGameOptions.fIronManMode ? gzGIOScreenText[GIO_IRON_MAN_TEXT] : gzGIOScreenText[GIO_SAVE_ANYWHERE_TEXT], buf2x);
+                            my__wchar2char(header.sInitialGameOptions.fGunNut      ? zSaveLoadText[SLG_ADDITIONAL_GUNS] : zSaveLoadText[SLG_NORMAL_GUNS], buf3);
+                            my__wchar2char(header.sInitialGameOptions.fSciFi       ? zSaveLoadText[SLG_SCIFI]           : zSaveLoadText[SLG_REALISTIC], buf4);
+			swprintf(options, lengthof(options), L"%20s     %22s     %22s     %22s",
+				buf1x,
 				/*gzGIOScreenText[GIO_TIMED_TURN_TITLE_TEXT + header.sInitialGameOptions.fTurnTimeLimit + 1],*/
-				header.sInitialGameOptions.fIronManMode ? gzGIOScreenText[GIO_IRON_MAN_TEXT] : gzGIOScreenText[GIO_SAVE_ANYWHERE_TEXT],
-				header.sInitialGameOptions.fGunNut      ? zSaveLoadText[SLG_ADDITIONAL_GUNS] : zSaveLoadText[SLG_NORMAL_GUNS],
-				header.sInitialGameOptions.fSciFi       ? zSaveLoadText[SLG_SCIFI]           : zSaveLoadText[SLG_REALISTIC]
+				buf2x,
+				buf3,
+				buf4
 			);
+//			swprintf(options, lengthof(options), L"%20ls     %22ls     %22ls     %22ls",
+//				difficulty,
+//				/*gzGIOScreenText[GIO_TIMED_TURN_TITLE_TEXT + header.sInitialGameOptions.fTurnTimeLimit + 1],*/
+//				header.sInitialGameOptions.fIronManMode ? gzGIOScreenText[GIO_IRON_MAN_TEXT] : gzGIOScreenText[GIO_SAVE_ANYWHERE_TEXT],
+//				header.sInitialGameOptions.fGunNut      ? zSaveLoadText[SLG_ADDITIONAL_GUNS] : zSaveLoadText[SLG_NORMAL_GUNS],
+//				header.sInitialGameOptions.fSciFi       ? zSaveLoadText[SLG_SCIFI]           : zSaveLoadText[SLG_REALISTIC]
+//			);
 
 			// The date
 			DrawTextToScreen(options, x + SLG_DATE_OFFSET_X, y, 0, font, foreground, FONT_MCOLOR_BLACK, LEFT_JUSTIFIED);
@@ -860,7 +884,15 @@ static BOOLEAN DisplaySaveGameEntry(INT8 const entry_idx)
 		{ // Display the Saved game information
 			// The date
 			wchar_t date[128];
-			swprintf(date, lengthof(date), L"%ls %d, %02d:%02d", pMessageStrings[MSG_DAY], header.uiDay, header.ubHour, header.ubMin);
+			// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                            char buf1[256];
+                            //char buf2[256];
+                            //char buf3[256];
+                            //char buf4[256];
+                            my__wchar2char( pMessageStrings[MSG_DAY], buf1);
+
+			//swprintf(date, lengthof(date), L"%ls %d, %02d:%02d", pMessageStrings[MSG_DAY], header.uiDay, header.ubHour, header.ubMin);
+			swprintf(date, lengthof(date), L"%s %d, %02d:%02d", buf1, header.uiDay, header.ubHour, header.ubMin);
 			DrawTextToScreen(date, x + SLG_DATE_OFFSET_X, y, 0, font, foreground, FONT_MCOLOR_BLACK, LEFT_JUSTIFIED);
 
 			// The sector
@@ -889,7 +921,14 @@ static BOOLEAN DisplaySaveGameEntry(INT8 const entry_idx)
 				MercAccountText[MERC_ACCOUNT_MERC] :
 				pMessageStrings[MSG_MERCS];
 			wchar_t merc_count[128];
-			swprintf(merc_count, lengthof(merc_count), L"%d %ls", n_mercs, merc);
+						// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                            char buf1b[256];
+                            //char buf2[256];
+                            //char buf3[256];
+                            //char buf4[256];
+                            my__wchar2char(merc, buf1b);
+			//swprintf(merc_count, lengthof(merc_count), L"%d %ls", n_mercs, merc);
+			swprintf(merc_count, lengthof(merc_count), L"%d %s", n_mercs, buf1b);
 			DrawTextToScreen(merc_count, x + SLG_NUM_MERCS_OFFSET_X, y, 0, font, foreground, FONT_MCOLOR_BLACK, LEFT_JUSTIFIED);
 
 			// The balance

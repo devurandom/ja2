@@ -39,7 +39,7 @@
 #include "Items.h"
 #include "Campaign.h"
 #include "SkillCheck.h"
-
+#include <android/log.h>
 
 #define NO_TEST_OBJECT												0
 #define TEST_OBJECT_NO_COLLISIONS							1
@@ -106,6 +106,7 @@ static REAL_OBJECT* GetFreeObjectSlot(void)
 		++guiNumObjectSlots;
 		return i;
 	}
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Out of physics object slots");
 	throw std::runtime_error("Out of physics object slots");
 }
 

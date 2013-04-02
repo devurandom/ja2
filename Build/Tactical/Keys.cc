@@ -839,15 +839,16 @@ void LoadDoorTableFromDoorTableTempFile()
 
 //	return( TRUE );
 
-	GetMapTempFileName( SF_DOOR_TABLE_TEMP_FILES_EXISTS, zMapName, gWorldSectorX, gWorldSectorY, gbWorldSectorZ );
+	// MADE ARM SPECIFIC CHANGE HERE (3x!)
+	GetMapTempFileName( SF_DOOR_TABLE_TEMP_FILES_EXISTS, (char*)zMapName, gWorldSectorX, gWorldSectorY, gbWorldSectorZ );
 
 	//If the file doesnt exists, its no problem.
-	if (!FileExists(zMapName)) return;
+	if (!FileExists((char*)zMapName)) return;
 
 	//Get rid of the existing door table
 	TrashDoorTable();
 
-	AutoSGPFile hFile(FileOpen(zMapName, FILE_ACCESS_READ));
+	AutoSGPFile hFile(FileOpen((char*)zMapName, FILE_ACCESS_READ));
 
 	//Read in the number of doors
 	FileRead(hFile, &gubMaxDoors, sizeof(UINT8));

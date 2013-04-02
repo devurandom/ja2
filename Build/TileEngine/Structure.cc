@@ -32,6 +32,7 @@
 #include "Random.h"
 #include "Tile_Animation.h"
 
+#include <android/log.h>
 
 #ifdef COUNT_PATHS
 	extern UINT32 guiSuccessfulPathChecks;
@@ -257,6 +258,7 @@ static void LoadStructureData(char const* const filename, STRUCTURE_FILE_REF* co
 	if (strncmp(id, STRUCTURE_FILE_ID, STRUCTURE_FILE_ID_LEN) != 0 ||
 			n_structures == 0)
 	{
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Failed to load structure file, because header is invalid");
 		throw std::runtime_error("Failed to load structure file, because header is invalid");
 	}
 
@@ -302,6 +304,7 @@ static void CreateFileStructureArrays(STRUCTURE_FILE_REF* const pFileRef, UINT32
 		if (uiDataSize < sizeof(DB_STRUCTURE))
 		{	// gone past end of file block?!
 			// freeing of memory will occur outside of the function
+			__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Failed to create structure arrays, because input data is too short");
 			throw std::runtime_error("Failed to create structure arrays, because input data is too short");
 		}
 		DB_STRUCTURE* const dbs = (DB_STRUCTURE*)pCurrent;
@@ -320,6 +323,7 @@ static void CreateFileStructureArrays(STRUCTURE_FILE_REF* const pFileRef, UINT32
 			if (uiDataSize < sizeof(DB_STRUCTURE_TILE))
 			{	// gone past end of file block?!
 				// freeing of memory will occur outside of the function
+				__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Failed to create structure arrays, because input data is too short");
 				throw std::runtime_error("Failed to create structure arrays, because input data is too short");
 			}
 			DB_STRUCTURE_TILE* const tile = (DB_STRUCTURE_TILE*)pCurrent;

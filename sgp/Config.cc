@@ -69,7 +69,9 @@ void ConfigSetValue(ConfigEntry* const entry, const char* const value)
 
 const char* ConfigGetValue(const ConfigEntry* const cfg)
 {
-	return cfg->value;
+	//return cfg->value;
+	// DEBUG DEBUG! always return this:
+	return "/sdcard/app-data/com.opensourced.ja2";
 }
 
 

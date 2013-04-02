@@ -472,8 +472,9 @@ static void IMPMainPageNotSelectableBtnCallback(MOUSE_REGION* pRegion, INT32 iRe
 SGPVObject* LoadIMPPortait()
 {
 	SGPFILENAME filename;
-	snprintf(filename, lengthof(filename), FACESDIR "/%d.sti", 200 + iPortraitNumber);
-	return AddVideoObjectFromFile(filename);
+	// MADE ARM SPECIFIC CHANGE HERE
+	snprintf((char*)filename, lengthof(filename), FACESDIR "/%d.sti", 200 + iPortraitNumber);
+	return AddVideoObjectFromFile((char*)filename);
 }
 
 

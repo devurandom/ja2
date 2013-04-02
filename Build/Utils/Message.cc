@@ -342,15 +342,47 @@ void ScreenMsg(UINT16 usColor, UINT8 ubPriority, const wchar_t* pStringA, ...)
 #endif
 	}
 
+
+    wchar_t DestString[512];
+#ifdef WORKING_VSPRINTF
 	va_list argptr;
 	va_start(argptr, pStringA);
-	wchar_t DestString[512];
 	vswprintf(DestString, lengthof(DestString), pStringA, argptr);
 	va_end(argptr);
+#else
+    char cstr[2048];
+	char cfmt[2048];
+	for (int wi=0, cj=0; wi<2048; wi++, cj++) {
+	    cfmt[cj] = (char) pStringA[wi];
+	    if (cfmt[cj] == 0) wi = 2048;
+	}
+    va_list ap;
+	va_start(ap, pStringA);
+	//vswprintf(str, lengthof(str), fmt, ap); // does this buddy break it?! YES IT DOES
+	vsprintf(cstr, cfmt, ap);
+	//custom_vswprintf(str, lengthof(str), fmt, ap);
+	va_end(ap);
+	//str[0] = L's';
+	//str[1] = L'h';
+	//str[2] = L'i';
+	//str[3] = L't';
+	size_t wchar_count = 0;
+	for (int i=0; i<2048; i++) {
+	    DestString[i] = cstr[i];
+	    wchar_count++;
+	    if (DestString[i]==0) i=2048;
+	}
+#endif
+
 
 	// pass onto tactical message and mapscreen message
-	TacticalScreenMsg(usColor, ubPriority, L"%ls", DestString);
-	MapScreenMessage(usColor, ubPriority, L"%ls", DestString);
+	// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[2048];
+            my__wchar2char( DestString, buf1);
+	TacticalScreenMsg(usColor, ubPriority, L"%s", buf1);
+	//TacticalScreenMsg(usColor, ubPriority, L"%ls", DestString);
+	MapScreenMessage(usColor, ubPriority, L"%s", buf1);
+	//MapScreenMessage(usColor, ubPriority, L"%ls", DestString);
 
 	if (guiCurrentScreen == MAP_SCREEN)
 	{
@@ -385,11 +417,38 @@ static void TacticalScreenMsg(UINT16 colour, UINT8 const priority, const wchar_t
 	if (giTimeCompressMode > TIME_COMPRESS_X1) return;
 	if (fDisableJustForIan && priority != MSG_ERROR && priority != MSG_INTERFACE) return;
 
+
+    wchar_t msg[512];
+#ifdef WORKING_VSPRINTF
 	va_list ap;
 	va_start(ap, fmt);
-	wchar_t msg[512];
+	//wchar_t msg[512];
 	vswprintf(msg, lengthof(msg), fmt, ap);
 	va_end(ap);
+#else
+    char cstr[2048];
+	char cfmt[2048];
+	for (int wi=0, cj=0; wi<2048; wi++, cj++) {
+	    cfmt[cj] = (char) fmt[wi];
+	    if (cfmt[cj] == 0) wi = 2048;
+	}
+    va_list ap;
+	va_start(ap, fmt);
+	//vswprintf(str, lengthof(str), fmt, ap); // does this buddy break it?! YES IT DOES
+	vsprintf(cstr, cfmt, ap);
+	//custom_vswprintf(str, lengthof(str), fmt, ap);
+	va_end(ap);
+	//str[0] = L's';
+	//str[1] = L'h';
+	//str[2] = L'i';
+	//str[3] = L't';
+	size_t wchar_count = 0;
+	for (int i=0; i<2048; i++) {
+	    msg[i] = cstr[i];
+	    wchar_count++;
+	    if (msg[i]==0) i=2048;
+	}
+#endif
 
 	switch (priority)
 	{
@@ -466,11 +525,37 @@ void MapScreenMessage(UINT16 usColor, UINT8 ubPriority, const wchar_t* pStringA,
 
 	wchar_t DestStringA[512];
 
+	wchar_t DestString[512];
+#ifdef WORKING_VSPRINTF
 	va_list argptr;
 	va_start(argptr, pStringA);
-	wchar_t DestString[512];
+	//wchar_t DestString[512];
 	vswprintf(DestString, lengthof(DestString), pStringA, argptr);
 	va_end(argptr);
+#else
+    char cstr[2048];
+	char cfmt[2048];
+	for (int wi=0, cj=0; wi<2048; wi++, cj++) {
+	    cfmt[cj] = (char) pStringA[wi];
+	    if (cfmt[cj] == 0) wi = 2048;
+	}
+    va_list ap;
+	va_start(ap, pStringA);
+	//vswprintf(str, lengthof(str), fmt, ap); // does this buddy break it?! YES IT DOES
+	vsprintf(cstr, cfmt, ap);
+	//custom_vswprintf(str, lengthof(str), fmt, ap);
+	va_end(ap);
+	//str[0] = L's';
+	//str[1] = L'h';
+	//str[2] = L'i';
+	//str[3] = L't';
+	size_t wchar_count = 0;
+	for (int i=0; i<2048; i++) {
+	    DestString[i] = cstr[i];
+	    wchar_count++;
+	    if (DestString[i]==0) i=2048;
+	}
+#endif
 
 	switch (ubPriority)
 	{

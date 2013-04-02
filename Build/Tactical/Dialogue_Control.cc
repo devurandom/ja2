@@ -822,12 +822,14 @@ BOOLEAN ExecuteCharacterDialogue(UINT8 const ubCharacterNum, UINT16 const usQuot
 	if( bUIHandlerID == DIALOGUE_EXTERNAL_NPC_UI )
 	{
 		// external NPC
-		SetFaceTalking(*face, zSoundString, gzQuoteStr);
+		// MADE ARM SPECIFIC CHANGE HERE
+		SetFaceTalking(*face, (char*)zSoundString, gzQuoteStr);
 	}
 	else
 	{
 		// start "talking" system (portrait animation and start wav sample)
-		SetFaceTalking(*face, zSoundString, gzQuoteStr);
+		// MADE ARM SPECIFIC CHANGE HERE
+		SetFaceTalking(*face, (char*)zSoundString, gzQuoteStr);
 	}
 	CreateTalkingUI(bUIHandlerID, *face, ubCharacterNum, gzQuoteStr);
 
@@ -975,8 +977,9 @@ static BOOLEAN GetDialogue(UINT8 ubCharacterNum, UINT16 usQuoteNum, UINT32 iData
    }
 
 	// CHECK IF THE FILE EXISTS, IF NOT, USE DEFAULT!
+	// MADE ARM SPECIFIC CHANGE HERE
 	const char* pFilename = GetDialogueDataFilename(ubCharacterNum, usQuoteNum, TRUE);
-	strcpy( zSoundString, pFilename );
+	strcpy( (char*)zSoundString, pFilename );
  return(TRUE);
 }
 
@@ -992,8 +995,17 @@ static void HandleTacticalNPCTextUI(const UINT8 ubCharacterNum, const wchar_t* c
 	}
 
 	// post message to mapscreen message system
-	swprintf( gTalkPanel.zQuoteStr, lengthof(gTalkPanel.zQuoteStr), L"\"%ls\"", zQuoteStr );
-	MapScreenMessage(FONT_MCOLOR_WHITE, MSG_DIALOG, L"%ls: \"%ls\"", GetProfile(ubCharacterNum).zNickname, zQuoteStr);
+	// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[768];
+            char buf2[768];
+            char buf3[768];
+            my__wchar2char( zQuoteStr , buf1);
+            my__wchar2char( GetProfile(ubCharacterNum).zNickname , buf2);
+            my__wchar2char( zQuoteStr , buf3);
+	swprintf( gTalkPanel.zQuoteStr, lengthof(gTalkPanel.zQuoteStr), L"\"%s\"", buf1 );
+	//swprintf( gTalkPanel.zQuoteStr, lengthof(gTalkPanel.zQuoteStr), L"\"%ls\"", zQuoteStr );
+	MapScreenMessage(FONT_MCOLOR_WHITE, MSG_DIALOG, L"%s: \"%s\"", buf2, buf3);
+	//MapScreenMessage(FONT_MCOLOR_WHITE, MSG_DIALOG, L"%ls: \"%ls\"", GetProfile(ubCharacterNum).zNickname, zQuoteStr);
 }
 
 
@@ -1013,8 +1025,17 @@ static void DisplayTextForExternalNPC(const UINT8 ubCharacterNum, const wchar_t*
 	}
 
 	// post message to mapscreen message system
-	swprintf( gTalkPanel.zQuoteStr, lengthof(gTalkPanel.zQuoteStr), L"\"%ls\"", zQuoteStr );
-	MapScreenMessage(FONT_MCOLOR_WHITE, MSG_DIALOG, L"%ls: \"%ls\"", GetProfile(ubCharacterNum).zNickname, zQuoteStr);
+	// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[768];
+            char buf2[768];
+            char buf3[768];
+            my__wchar2char( zQuoteStr , buf1);
+            my__wchar2char( GetProfile(ubCharacterNum).zNickname , buf2);
+            my__wchar2char( zQuoteStr , buf3);
+	swprintf( gTalkPanel.zQuoteStr, lengthof(gTalkPanel.zQuoteStr), L"\"%s\"", buf1 );
+	//swprintf( gTalkPanel.zQuoteStr, lengthof(gTalkPanel.zQuoteStr), L"\"%ls\"", zQuoteStr );
+	MapScreenMessage(FONT_MCOLOR_WHITE, MSG_DIALOG, L"%s: \"%s\"", buf2, buf3);
+	//MapScreenMessage(FONT_MCOLOR_WHITE, MSG_DIALOG, L"%ls: \"%ls\"", GetProfile(ubCharacterNum).zNickname, zQuoteStr);
 
 	if ( guiCurrentScreen == MAP_SCREEN )
 	{
@@ -1035,7 +1056,13 @@ static void HandleTacticalTextUI(const ProfileID profile_id, const wchar_t* cons
 	wchar_t								zText[ QUOTE_MESSAGE_SIZE ];
 	INT16									sLeft = 0;
 
-	swprintf( zText, lengthof(zText), L"\"%ls\"", zQuoteStr );
+// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[768];
+
+            my__wchar2char( zQuoteStr , buf1);
+
+	swprintf( zText, lengthof(zText), L"\"%s\"", buf1 );
+	//swprintf( zText, lengthof(zText), L"\"%ls\"", zQuoteStr );
 	sLeft	= 110;
 
 
@@ -1044,7 +1071,13 @@ static void HandleTacticalTextUI(const ProfileID profile_id, const wchar_t* cons
 
 	ExecuteTacticalTextBox( sLeft, zText );
 
-	MapScreenMessage(FONT_MCOLOR_WHITE, MSG_DIALOG, L"%ls: \"%ls\"", GetProfile(profile_id).zNickname, zQuoteStr);
+// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf2[768];
+            char buf3[768];
+            my__wchar2char( GetProfile(profile_id).zNickname , buf2);
+            my__wchar2char( zQuoteStr , buf3);
+	MapScreenMessage(FONT_MCOLOR_WHITE, MSG_DIALOG, L"%s: \"%s\"", buf2, buf3);
+	//MapScreenMessage(FONT_MCOLOR_WHITE, MSG_DIALOG, L"%ls: \"%ls\"", GetProfile(profile_id).zNickname, zQuoteStr);
 }
 
 

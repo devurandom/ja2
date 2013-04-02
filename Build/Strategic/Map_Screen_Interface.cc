@@ -1082,7 +1082,15 @@ static void HandleEquipmentLeft(UINT32 const slot_idx, UINT const sector, GridNo
 		}
 		else
 		{
-			swprintf(sString, lengthof(sString), L"A departing merc has left their equipment in %ls (%c%d).", town, y, x);
+		    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[128];
+            //char buf2[64];
+            //char buf3[64];
+            my__wchar2char(  town, buf1);
+            //my__wchar2char( pMapHortIndex[x], buf2);
+            //my__wchar2char( pMapDepthIndex[s.bSectorZ], buf3);
+			swprintf(sString, lengthof(sString), L"A departing merc has left their equipment in %s (%c%d).", buf1, y, x);
+			//swprintf(sString, lengthof(sString), L"A departing merc has left their equipment in %ls (%c%d).", town, y, x);
 		}
 		ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, sString);
 
@@ -1284,36 +1292,83 @@ void UpdateCharRegionHelpText(void)
 	else if (s->bAssignment == ASSIGNMENT_POW)
 	{
 		// POW - stats unknown
-		swprintf(status, lengthof(status), L"%ls: ??, %ls: ??, %ls: ??",
-			pMapScreenStatusStrings[0],
-			pMapScreenStatusStrings[1],
-			pMapScreenStatusStrings[2]
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[128];
+            char buf2[128];
+            char buf3[128];
+            my__wchar2char( pMapScreenStatusStrings[0], buf1);
+            my__wchar2char( pMapScreenStatusStrings[1], buf2);
+            my__wchar2char( pMapScreenStatusStrings[2], buf3);
+		swprintf(status, lengthof(status), L"%s: ??, %s: ??, %s: ??",
+			buf1,
+			buf2,
+			buf3
 		);
+//		swprintf(status, lengthof(status), L"%ls: ??, %ls: ??, %ls: ??",
+//			pMapScreenStatusStrings[0],
+//			pMapScreenStatusStrings[1],
+//			pMapScreenStatusStrings[2]
+//		);
 	}
 	else if (AM_A_ROBOT(s))
 	{
 		// robot (condition only)
-		swprintf(status, lengthof(status), L"%ls: %d/%d",
-			pMapScreenStatusStrings[3], s->bLife, s->bLifeMax
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[128];
+            //char buf2[128];
+            //char buf3[128];
+            my__wchar2char( pMapScreenStatusStrings[3], buf1);
+            //my__wchar2char( pMapScreenStatusStrings[1], buf2);
+            //my__wchar2char( pMapScreenStatusStrings[2] buf3);
+		swprintf(status, lengthof(status), L"%s: %d/%d",
+			buf1 , s->bLife, s->bLifeMax
 		);
+//        swprintf(status, lengthof(status), L"%ls: %d/%d",
+//			pMapScreenStatusStrings[3], s->bLife, s->bLifeMax
+//		);
 	}
 	else if (s->uiStatusFlags & SOLDIER_VEHICLE)
 	{
 		// vehicle (condition/fuel)
-		swprintf(status, lengthof(status), L"%ls: %d/%d, %ls: %d/%d",
-			pMapScreenStatusStrings[3], s->bLife,   s->bLifeMax,
-			pMapScreenStatusStrings[4], s->bBreath, s->bBreathMax
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[128];
+            char buf2[128];
+            //char buf3[128];
+            my__wchar2char( pMapScreenStatusStrings[3], buf1);
+            my__wchar2char( pMapScreenStatusStrings[4], buf2);
+            //my__wchar2char( pMapScreenStatusStrings[2] buf3);
+		swprintf(status, lengthof(status), L"%s: %d/%d, %s: %d/%d",
+			buf1, s->bLife,   s->bLifeMax,
+			buf2, s->bBreath, s->bBreathMax
 		);
+//        swprintf(status, lengthof(status), L"%ls: %d/%d, %ls: %d/%d",
+//			pMapScreenStatusStrings[3], s->bLife,   s->bLifeMax,
+//			pMapScreenStatusStrings[4], s->bBreath, s->bBreathMax
+//		);
 	}
 	else
 	{
 		// person (health/energy/morale)
 		wchar_t const* const morale = GetMoraleString(*s);
-		swprintf(status, lengthof(status), L"%ls: %d/%d, %ls: %d/%d, %ls: %ls",
-			pMapScreenStatusStrings[0], s->bLife,   s->bLifeMax,
-			pMapScreenStatusStrings[1], s->bBreath, s->bBreathMax,
-			pMapScreenStatusStrings[2], morale
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[128];
+            char buf2[128];
+            char buf3[128];
+            char buf4[128];
+            my__wchar2char( pMapScreenStatusStrings[0], buf1);
+            my__wchar2char( pMapScreenStatusStrings[1], buf2);
+            my__wchar2char( pMapScreenStatusStrings[2], buf3);
+            my__wchar2char( morale, buf4);
+		swprintf(status, lengthof(status), L"%s: %d/%d, %s: %d/%d, %s: %s",
+			buf1, s->bLife,   s->bLifeMax,
+			buf2, s->bBreath, s->bBreathMax,
+			buf3, buf4
 		);
+//        swprintf(status, lengthof(status), L"%ls: %d/%d, %ls: %d/%d, %ls: %ls",
+//			pMapScreenStatusStrings[0], s->bLife,   s->bLifeMax,
+//			pMapScreenStatusStrings[1], s->bBreath, s->bBreathMax,
+//			pMapScreenStatusStrings[2], morale
+//		);
 	}
 	gMapStatusBarsRegion.SetFastHelpText(status);
 
@@ -2379,7 +2434,14 @@ static void AddStringsToMoveBox(PopUpBox* const box)
 	for( iCount = 0; iCount < giNumberOfSquadsInSectorMoving; iCount++ )
 	{
 		// add this squad, now add all the grunts in it
-		swprintf(sString, lengthof(sString), fSquadIsMoving[iCount] ? L"*%ls*" : L"%ls", pSquadMenuStrings[iSquadMovingList[iCount]]);
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[256];
+            //char buf2[128];
+            my__wchar2char( pSquadMenuStrings[iSquadMovingList[iCount]], buf1);
+            //my__wchar2char( pMapScreenStatusStrings[1], buf2);
+
+		swprintf(sString, lengthof(sString), fSquadIsMoving[iCount] ? L"*%s*" : L"%s", buf1);
+		//swprintf(sString, lengthof(sString), fSquadIsMoving[iCount] ? L"*%ls*" : L"%ls", pSquadMenuStrings[iSquadMovingList[iCount]]);
 		AddMonoString(box, sString);
 
 		// now add all the grunts in it
@@ -2390,11 +2452,23 @@ static void AddStringsToMoveBox(PopUpBox* const box)
 				// add mercs in squads
 				if (IsSoldierSelectedForMovement(*pSoldierMovingList[iCountB]))
 				{
-					swprintf( sString, lengthof(sString), L"   *%ls*", pSoldierMovingList[ iCountB ]->name );
+				    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[256];
+                    //char buf2[128];
+                    my__wchar2char( pSoldierMovingList[ iCountB ]->name, buf1);
+                    //my__wchar2char( pMapScreenStatusStrings[1], buf2);
+					swprintf( sString, lengthof(sString), L"   *%s*", buf1 );
+					//swprintf( sString, lengthof(sString), L"   *%ls*", pSoldierMovingList[ iCountB ]->name );
 				}
 				else
 				{
-					swprintf( sString, lengthof(sString), L"   %ls", pSoldierMovingList[ iCountB ]->name );
+				    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[256];
+                    //char buf2[128];
+                    my__wchar2char( pSoldierMovingList[ iCountB ]->name, buf1);
+                    //my__wchar2char( pMapScreenStatusStrings[1], buf2);
+					swprintf( sString, lengthof(sString), L"   %s", buf1 );
+					//swprintf( sString, lengthof(sString), L"   %ls", pSoldierMovingList[ iCountB ]->name );
 				}
 				AddMonoString(box, sString);
 			}
@@ -2406,7 +2480,13 @@ static void AddStringsToMoveBox(PopUpBox* const box)
 	for( iCount = 0; iCount < giNumberOfVehiclesInSectorMoving; iCount++ )
 	{
 		// add this vehicle
-		swprintf(sString, lengthof(sString), fVehicleIsMoving[iCount] ? L"*%ls*" : L"%ls", pVehicleStrings[pVehicleList[iVehicleMovingList[iCount]].ubVehicleType]);
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[256];
+                    //char buf2[128];
+                    my__wchar2char( pVehicleStrings[pVehicleList[iVehicleMovingList[iCount]].ubVehicleType], buf1);
+                    //my__wchar2char( pMapScreenStatusStrings[1], buf2);
+		swprintf(sString, lengthof(sString), fVehicleIsMoving[iCount] ? L"*%s*" : L"%s", buf1);
+		//swprintf(sString, lengthof(sString), fVehicleIsMoving[iCount] ? L"*%ls*" : L"%ls", pVehicleStrings[pVehicleList[iVehicleMovingList[iCount]].ubVehicleType]);
 		AddMonoString(box, sString);
 
 		// now add all the grunts in it
@@ -2417,11 +2497,23 @@ static void AddStringsToMoveBox(PopUpBox* const box)
 				// add mercs in vehicles
 				if (IsSoldierSelectedForMovement(*pSoldierMovingList[iCountB]))
 				{
-					swprintf( sString, lengthof(sString), L"   *%ls*", pSoldierMovingList[ iCountB ]->name );
+				    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[256];
+                    //char buf2[128];
+                    my__wchar2char( pSoldierMovingList[ iCountB ]->name, buf1);
+                    //my__wchar2char( pMapScreenStatusStrings[1], buf2);
+					swprintf( sString, lengthof(sString), L"   *%s*", buf1 );
+					//swprintf( sString, lengthof(sString), L"   *%ls*", pSoldierMovingList[ iCountB ]->name );
 				}
 				else
 				{
-					swprintf( sString, lengthof(sString), L"   %ls", pSoldierMovingList[ iCountB ]->name );
+				    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[256];
+                    //char buf2[128];
+                    my__wchar2char( pSoldierMovingList[ iCountB ]->name, buf1);
+                    //my__wchar2char( pMapScreenStatusStrings[1], buf2);
+					swprintf( sString, lengthof(sString), L"   %s", buf1 );
+					//swprintf( sString, lengthof(sString), L"   %ls", pSoldierMovingList[ iCountB ]->name );
 				}
 				AddMonoString(box, sString);
 			}
@@ -2440,14 +2532,26 @@ static void AddStringsToMoveBox(PopUpBox* const box)
 			if ( fFirstOne )
 			{
 				// add OTHER header line
-				swprintf(sString, lengthof(sString), AllOtherSoldiersInListAreSelected() ? L"*%ls*" : L"%ls", pMovementMenuStrings[3]);
+				// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[256];
+                    //char buf2[128];
+                    my__wchar2char( pMovementMenuStrings[3], buf1);
+                    //my__wchar2char( pMapScreenStatusStrings[1], buf2);
+				swprintf(sString, lengthof(sString), AllOtherSoldiersInListAreSelected() ? L"*%s*" : L"%s", buf1);
+				//swprintf(sString, lengthof(sString), AllOtherSoldiersInListAreSelected() ? L"*%ls*" : L"%ls", pMovementMenuStrings[3]);
 				AddMonoString(box, sString);
 
 				fFirstOne = FALSE;
 			}
 
 			// add OTHER soldiers (not on duty nor in a vehicle)
-			swprintf(sString, lengthof(sString), IsSoldierSelectedForMovement(*pSoldierMovingList[iCount]) ? L"  *%ls ( %ls )*" : L"  %ls ( %ls )", pSoldierMovingList[iCount]->name, pAssignmentStrings[pSoldierMovingList[iCount]->bAssignment]);
+			// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[256];
+                    char buf2[256];
+                    my__wchar2char( pSoldierMovingList[iCount]->name, buf1);
+                    my__wchar2char( pAssignmentStrings[pSoldierMovingList[iCount]->bAssignment], buf2);
+			swprintf(sString, lengthof(sString), IsSoldierSelectedForMovement(*pSoldierMovingList[iCount]) ? L"  *%s ( %s )*" : L"  %s ( %s )", buf1, buf2);
+			//swprintf(sString, lengthof(sString), IsSoldierSelectedForMovement(*pSoldierMovingList[iCount]) ? L"  *%ls ( %ls )*" : L"  %ls ( %ls )", pSoldierMovingList[iCount]->name, pAssignmentStrings[pSoldierMovingList[iCount]->bAssignment]);
 			AddMonoString(box, sString);
 		}
 	}

@@ -23,6 +23,23 @@
 
 extern Font FontDefault;
 
+#ifdef WORKING_VSPRINTF
+#else
+    void my__wchar2char(const wchar_t* ws, char* s);
+    wchar_t* my__wcsncat(wchar_t * dest, const wchar_t* src, size_t maxlen);
+    wchar_t* my__wcscat(wchar_t * dest, const wchar_t* src);
+    size_t my__wcslen(const wchar_t * ws);
+    wchar_t* my__wcslcpy(wchar_t *dest, const wchar_t * src, size_t len);
+    wchar_t* my__wcscpy(wchar_t *dest, const wchar_t * src);
+    size_t my__swprintf(wchar_t * dest, size_t length, const wchar_t* fmt, ...);
+    #define swprintf my__swprintf
+    //#define vswprintf my__swprintf
+    #define wcslcpy my__wcslcpy
+    #define wcscpy my__wcscpy
+    #define wcslen my__wcslen
+    #define wcscat my__wcscat
+    #define wcsncat my__wcsncat
+#endif
 
 void SetFontColors(UINT16 usColors);
 void SetFontForeground(UINT8 ubForeground);

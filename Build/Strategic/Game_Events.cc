@@ -9,6 +9,7 @@
 #include "Text.h"
 #include "FileMan.h"
 
+#include "Font.h"
 
 #ifdef JA2TESTVERSION
 
@@ -149,7 +150,16 @@ static void AdjustClockToEventStamp(STRATEGICEVENT* pEvent, UINT32* puiAdjustmen
 	guiHour = ( guiGameClock - ( guiDay * NUM_SEC_IN_DAY ) ) / NUM_SEC_IN_HOUR;
 	guiMin	= ( guiGameClock - ( ( guiDay * NUM_SEC_IN_DAY ) + ( guiHour * NUM_SEC_IN_HOUR ) ) ) / NUM_SEC_IN_MIN;
 
-	swprintf(WORLDTIMESTR, lengthof(WORLDTIMESTR), L"%ls %d, %02d:%02d", gpGameClockString, guiDay, guiHour, guiMin);
+    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                            char buf1[128];
+                            //char buf2[128];
+                            //char buf3[128];
+                            //char buf4[256];
+                            my__wchar2char( gpGameClockString, buf1);
+                            //my__wchar2char( gsTimeStrings[1], buf2);
+                            //my__wchar2char( gsTimeStrings[2], buf3);
+	//swprintf(WORLDTIMESTR, lengthof(WORLDTIMESTR), L"%ls %d, %02d:%02d", gpGameClockString, guiDay, guiHour, guiMin);
+	swprintf(WORLDTIMESTR, lengthof(WORLDTIMESTR), L"%s %d, %02d:%02d", buf1, guiDay, guiHour, guiMin);
 }
 
 

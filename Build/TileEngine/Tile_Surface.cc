@@ -16,7 +16,7 @@
 #include "FileMan.h"
 #include "MemMan.h"
 #include "Tile_Cache.h"
-
+#include <android/log.h>
 
 TILE_IMAGERY				*gTileSurfaceArray[ NUMBEROFTILETYPES ];
 
@@ -40,6 +40,7 @@ try
 
 		if (hVObject->SubregionCount() != pStructureFileRef->usNumberOfStructures)
 		{
+			__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Structure file error");
 			throw std::runtime_error("Structure file error");
 		}
 

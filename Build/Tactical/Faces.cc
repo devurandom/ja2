@@ -38,7 +38,7 @@
 #include "SoundMan.h"
 #include "JAScreens.h"
 #include "ScreenIDs.h"
-
+#include <android/log.h>
 
 // Defines
 #define		NUM_FACE_SLOTS					50
@@ -115,6 +115,7 @@ static FACETYPE& GetFreeFace(void)
 		if (!i->fAllocated) return *i;
 	}
 	if (guiNumFaces < NUM_FACE_SLOTS) return gFacesData[guiNumFaces++];
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Out of face slots");
 	throw std::runtime_error("Out of face slots");
 }
 
@@ -171,10 +172,10 @@ FACETYPE& InitFace(const ProfileID id, SOLDIERTYPE* const s, const UINT32 uiInit
 
 	// HERVE, PETER, ALBERTO and CARLO all use HERVE's portrait
 	INT32 const face_id = HERVE <= id && id <= CARLO ? HERVE : p.ubFaceIndex;
-
+// MADE ARM SPECIFIC CHANGE HERE
 	SGPFILENAME ImageFile = "";
-	sprintf(ImageFile, face_file, face_id);
-	SGPVObject* const vo = AddVideoObjectFromFile(ImageFile);
+	sprintf((char*)ImageFile, face_file, face_id);
+	SGPVObject* const vo = AddVideoObjectFromFile((char*)ImageFile);
 
 	memset(&f, 0, sizeof(f));
 	f.uiFlags               = uiInitFlags;

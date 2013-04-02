@@ -44,6 +44,7 @@
 #include "PathAI.h"
 #include "MemMan.h"
 
+#include <android/log.h>
 
 #define MAX_LIGHT_TEMPLATES 32 // maximum number of light types
 
@@ -525,6 +526,7 @@ static LightTemplate* LightGetFree(void)
 	{
 		if (!t->lights) return t;
 	}
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Out of light template slots");
 	throw std::runtime_error("Out of light template slots");
 }
 
@@ -2067,7 +2069,10 @@ BOOLEAN fOnlyWalls;
 ***************************************************************************************/
 void LightSave(LightTemplate const* const t, char const* const pFilename)
 {
-	if (t->lights == NULL) throw std::logic_error("Tried to save invalid light template");
+	if (t->lights == NULL) {
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Tried to save invalid light template");
+		throw std::logic_error("Tried to save invalid light template");
+	}
 
 	const char* const pName = (pFilename != NULL ? pFilename : t->name);
 	AutoSGPFile f(FileOpen(pName, FILE_ACCESS_WRITE | FILE_CREATE_ALWAYS));

@@ -7,7 +7,7 @@
 #include "HImage.h"
 #include "Debug.h"
 #include "STCI.h"
-
+#include <android/log.h>
 
 static SGPImage* STCILoadIndexed(UINT16 contents, HWFILE, STCIHeader const*);
 static SGPImage* STCILoadRGB(    UINT16 contents, HWFILE, STCIHeader const*);
@@ -21,20 +21,23 @@ SGPImage* LoadSTCIFileToImage(char const* const filename, UINT16 const fContents
 	FileRead(f, &header, sizeof(header));
 	if (memcmp(header.cID, STCI_ID_STRING, STCI_ID_LEN) != 0)
 	{
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: STCI File has invalid header");
 		throw std::runtime_error("STCI file has invalid header");
 	}
 
 	if (header.fFlags & STCI_ZLIB_COMPRESSED)
 	{
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Cannot handle zlib compressed STCI files");
 		throw std::runtime_error("Cannot handle zlib compressed STCI files");
 	}
-
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "maybe ... RUNTIME ERROR: Unknown data organization in STCI file.");
 	// Determine from the header the data stored in the file. and run the appropriate loader
 	return
 		header.fFlags & STCI_RGB     ? STCILoadRGB(    fContents, f, &header) :
 		header.fFlags & STCI_INDEXED ? STCILoadIndexed(fContents, f, &header) :
 		/* Unsupported type of data, or the right flags weren't set! */
 		throw std::runtime_error("Unknown data organization in STCI file.");
+		
 }
 
 
@@ -42,6 +45,7 @@ static SGPImage* STCILoadRGB(UINT16 const contents, HWFILE const f, STCIHeader c
 {
 	if (contents & IMAGE_PALETTE && (contents & IMAGE_ALLIMAGEDATA) != IMAGE_ALLIMAGEDATA)
 	{ // RGB doesn't have a palette!
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Invalid combination of content load flags");
 		throw std::logic_error("Invalid combination of content load flags");
 	}
 
@@ -97,6 +101,7 @@ static SGPImage* STCILoadIndexed(UINT16 const contents, HWFILE const f, STCIHead
 	{ // Allocate memory for reading in the palette
 		if (header->Indexed.uiNumberOfColours != 256)
 		{
+			__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Palettized image has bad palette size.");
 			throw std::runtime_error("Palettized image has bad palette size.");
 		}
 

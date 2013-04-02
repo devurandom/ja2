@@ -5,7 +5,7 @@
 #include "PCX.h"
 #include "MemMan.h"
 #include "FileMan.h"
-
+#include <android/log.h>
 
 struct PcxHeader
 {
@@ -40,6 +40,7 @@ SGPImage* LoadPCXFileToImage(char const* const filename, UINT16 const contents)
 	FileRead(f, &header, sizeof(header));
 	if (header.ubManufacturer != 10 || header.ubEncoding != 1)
 	{
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: PCX File has invalid header");
 		throw std::runtime_error("PCX file has invalid header");
 	}
 

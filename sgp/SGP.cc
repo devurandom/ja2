@@ -5,9 +5,9 @@
 #	define BROKEN_SWPRINTF
 #endif
 
-#if defined BROKEN_SWPRINTF
+//#if defined BROKEN_SWPRINTF
 #	include <locale.h>
-#endif
+//#endif
 
 #include <exception>
 #include <new>
@@ -38,6 +38,7 @@
 #	include <windows.h>
 #endif
 
+#include <android/log.h>
 
 #ifdef JA2
 extern BOOLEAN gfPauseDueToPlayerGamePause;
@@ -118,10 +119,17 @@ static void SGPExit(void);
 
 static void InitializeStandardGamingPlatform(void)
 {
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "InitializeStandardGamingPlatform(void) CALLED!");
+
 	// now required by all (even JA2) in order to call ShutdownSGP
 	atexit(SGPExit);
 
+    __android_log_print(ANDROID_LOG_INFO, "==TEST==", "Calling SDL_Init");
+
 	SDL_Init(SDL_INIT_VIDEO);
+
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "Calling SDLEnableUnicode");
+
 	SDL_EnableUNICODE(SDL_ENABLE);
 
 #ifdef SGP_DEBUG
@@ -132,18 +140,28 @@ static void InitializeStandardGamingPlatform(void)
   // this one needs to go ahead of all others (except Debug), for MemDebugCounter to work right...
 	FastDebugMsg("Initializing Memory Manager");
 	// Initialize the Memory Manager
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", " Initialize the Memory Manager calling!");
+
 	InitializeMemoryManager();
 
 	FastDebugMsg("Initializing File Manager");
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", " Initialize the File Manager calling!");
+
 	InitializeFileManager();
 
 	FastDebugMsg("Initializing Video Manager");
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", " Initialize the Video Manager calling!");
+
 	InitializeVideoManager();
 
 	FastDebugMsg("Initializing Video Object Manager");
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", " Initialize the VideoObject Manager calling!");
+
 	InitializeVideoObjectManager();
 
 	FastDebugMsg("Initializing Video Surface Manager");
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", " Initialize the VideoSurface Manager calling!");
+
 	InitializeVideoSurfaceManager();
 
 #ifdef JA2
@@ -167,6 +185,7 @@ static void InitializeStandardGamingPlatform(void)
 	FastDebugMsg("Initializing Game Manager");
 	// Initialize the Game
 	InitializeGame();
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", " InitializeGame successful!");
 
 	gfGameInitialized = TRUE;
 }
@@ -248,7 +267,7 @@ static void MainLoop()
 			if (gfApplicationActive)
 			{
 				GameLoop();
-				SDL_Delay(1); // XXX HACK0001
+				//SDL_Delay(1); // XXX HACK0001
 			}
 			else
 			{
@@ -275,29 +294,33 @@ static BOOLEAN ParseParameters(char* const argv[]);
 int main(int argc, char* argv[])
 try
 {
+	argv[1] = "-nosound";
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "MAIN CALLED!");
 #if defined BROKEN_SWPRINTF
-	if (setlocale(LC_CTYPE, "UTF-8") == NULL)
+	if (setlocale(LC_CTYPE, "en_US.UTF-8") == NULL)
 	{
 		fprintf(stderr, "WARNING: Failed to set LC_CTYPE to UTF-8. Some strings might get garbled.\n");
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "WARNING: Failed to set LC_CTYPE to UTF-8. Some strings might get garbled.");
 	}
 #endif
-
-	if (!ParseParameters(argv)) return EXIT_FAILURE;
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "MAIN CALLED2");
+	//if (!ParseParameters(argv)) return EXIT_FAILURE;
 
 	InitializeStandardGamingPlatform();
-
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "MAIN CALLED3");
 #if defined JA2 && defined ENGLISH
 	SetIntroType(INTRO_SPLASH);
 #endif
 
-	FastDebugMsg("Running Game");
+	//FastDebugMsg("Running Game");
 
 	/* At this point the SGP is set up, which means all I/O, Memory, tools, etc.
 	 * are available. All we need to do is attend to the gaming mechanics
 	 * themselves */
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "MAIN LOOP CALL:");
 	MainLoop();
-
-	FastDebugMsg("Exiting Game");
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "MAIN LOOP DONE!");
+	//FastDebugMsg("Exiting Game");
 
 	// SGPExit() will be called next through the atexit() mechanism
 	return EXIT_SUCCESS;
@@ -404,6 +427,10 @@ static BOOLEAN ParseParameters(char* const argv[])
 		}
 #	endif
 #endif
+	// DEFAULT TO NOSOUND FOR MORE SPEED! DOES NOT WORK...
+	//SoundEnableSound(FALSE);
+	// SET fullscreen?
+	VideoSetFullScreen(TRUE);
 		else
 		{
 			if (strcmp(arg, "-help") != 0)

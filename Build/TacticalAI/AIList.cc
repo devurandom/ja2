@@ -20,6 +20,7 @@
 #include "OppList.h"
 #include "Interface.h"
 
+#include <android/log.h>
 
 #define MAX_AI_PRIORITY 100
 
@@ -62,6 +63,7 @@ static AILIST* CreateNewAIListEntry(SOLDIERTYPE* const s, INT8 const priority)
 		e.pNext     = 0;
 		return &e;
 	}
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: out of AI list entries");
 	throw std::runtime_error("out of AI list entries");
 }
 

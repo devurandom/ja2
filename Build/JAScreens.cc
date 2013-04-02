@@ -43,6 +43,7 @@
 #	include "Music_Control.h"
 #	include "WordWrap.h"
 #endif
+#include <android/log.h>
 
 
 #define MAX_DEBUG_PAGES 4
@@ -115,6 +116,7 @@ ScreenID ErrorScreenHandle(void)
 
 	SetFontAttributes(FONT12ARIAL, FONT_YELLOW);
 	mprintf(50, 255, L"%hs", gubErrorText);
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: %s", gubErrorText);
 
 	if ( !fFirstTime )
 	{
@@ -185,6 +187,7 @@ ScreenID InitScreenHandle(void)
 			L"%ls: %hs (Debug %hs)",
 #else
 			L"%ls: %hs (%hs)",
+			//(wchar_t*)"magickstring");
 #endif
 			pMessageStrings[MSG_VERSION], g_version_label, g_version_number
 		);
@@ -302,7 +305,8 @@ static void CyclePaletteReplacement(SOLDIERTYPE& s, PaletteRepID pal)
 	const UINT8 ubEndRep = ubStartRep + gubpNumReplacementsPerRange[ubType];
 
 	if (ubPaletteRep == ubEndRep) ubPaletteRep = ubStartRep;
-	SET_PALETTEREP_ID(pal, gpPalRep[ubPaletteRep].ID);
+	// MADE ARM CHANGE HERE!!!
+	SET_PALETTEREP_ID((char*)pal, (char*)gpPalRep[ubPaletteRep].ID);
 
 	CreateSoldierPalettes(s);
 }

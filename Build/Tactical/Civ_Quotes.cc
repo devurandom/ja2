@@ -29,6 +29,7 @@
 #include "Random.h"
 #include "FileMan.h"
 
+#include "Font.h"
 
 #define CIV_QUOTE_TEXT_SIZE 160
 
@@ -326,11 +327,20 @@ void BeginCivQuote( SOLDIERTYPE *pCiv, UINT8 ubCivQuoteID, UINT8 ubEntryID, INT1
 	}
 
 	wchar_t	gzCivQuote[320];
-	swprintf( gzCivQuote, lengthof(gzCivQuote), L"\"%ls\"", zQuote );
+	// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[768];
+            my__wchar2char( zQuote , buf1);
+
+	swprintf( gzCivQuote, lengthof(gzCivQuote), L"\"%s\"",buf1 );
+	//swprintf( gzCivQuote, lengthof(gzCivQuote), L"\"%ls\"", zQuote );
 
 	if ( ubCivQuoteID == CIV_QUOTE_HINT )
 	{
-		MapScreenMessage( FONT_MCOLOR_WHITE, MSG_DIALOG, L"%ls",  gzCivQuote );
+	    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf2[768];
+            my__wchar2char( gzCivQuote , buf2);
+		MapScreenMessage( FONT_MCOLOR_WHITE, MSG_DIALOG, L"%s",  buf2 );
+		//MapScreenMessage( FONT_MCOLOR_WHITE, MSG_DIALOG, L"%ls",  gzCivQuote );
 	}
 
 	// Prepare text box

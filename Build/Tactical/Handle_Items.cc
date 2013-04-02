@@ -287,7 +287,11 @@ ItemHandleResult HandleItem(SOLDIERTYPE* const s, INT16 usGridNo, const INT8 bLe
 						if (s->bTeam == gbPlayerNum)
 						{
 							PlayJA2Sample(RG_ID_IMPRINTED, HIGHVOLUME, 1, MIDDLE);
-							ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"\"%ls\"", TacticalStr[GUN_GOT_FINGERPRINT]);
+							// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                            char buf2[768];
+                            my__wchar2char( TacticalStr[GUN_GOT_FINGERPRINT] , buf2);
+							ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"\"%s\"", buf2);
+							//ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_INTERFACE, L"\"%ls\"", TacticalStr[GUN_GOT_FINGERPRINT]);
 							return ITEM_HANDLE_BROKEN;
 						}
 					}
@@ -2064,7 +2068,11 @@ void DrawItemPoolList(const ITEM_POOL* const pItemPool, const INT8 bZLevel, cons
 		wchar_t                buf[100];
 		if (wi.o.ubNumberOfObjects > 1)
 		{
-			swprintf(buf, lengthof(buf), L"%ls (%d)", txt, wi.o.ubNumberOfObjects);
+		    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                            char buf3[768];
+                            my__wchar2char( txt , buf3);
+			swprintf(buf, lengthof(buf), L"%s (%d)", buf3, wi.o.ubNumberOfObjects);
+			//swprintf(buf, lengthof(buf), L"%ls (%d)", txt, wi.o.ubNumberOfObjects);
 			txt = buf;
 		}
 
@@ -2112,7 +2120,11 @@ void DrawItemPoolList(const ITEM_POOL* const pItemPool, const INT8 bZLevel, cons
 		wchar_t   const* const txt = ShortItemNames[wi.o.usItem];
 		if (wi.o.ubNumberOfObjects > 1)
 		{
-			GDirtyPrintF(x, y, L"%ls (%d)", txt, wi.o.ubNumberOfObjects);
+		    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                            char buf4[768];
+                            my__wchar2char( txt , buf4);
+			GDirtyPrintF(x, y, L"%s (%d)", buf4, wi.o.ubNumberOfObjects);
+			//GDirtyPrintF(x, y, L"%ls (%d)", txt, wi.o.ubNumberOfObjects);
 		}
 		else
 		{

@@ -15,6 +15,9 @@
 #include "WCheck.h"
 #include "WordWrap.h"
 
+#include <android/log.h>
+
+
 #ifdef _JA2_RENDER_DIRTY
 #	include "Font_Control.h"
 #endif
@@ -570,13 +573,16 @@ GUI_BUTTON::~GUI_BUTTON()
 }
 
 
-static void CopyButtonText(GUI_BUTTON* b, const wchar_t* text)
+static void CopyButtonText(GUI_BUTTON* b, const wchar_t* const text)
 {
+
+
 	if (text == NULL || text[0] == L'\0') return;
 
 	wchar_t* const Buf = MALLOCN(wchar_t, wcslen(text) + 1);
 	wcscpy(Buf, text);
 	b->string = Buf;
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "CopyButtonText: %ls to %ls(Buf) / %ls(bstring)", text, Buf, b->string);
 }
 
 
@@ -666,6 +672,7 @@ GUIButtonRef QuickCreateButtonImg(char const* const gfx, INT32 const off_normal,
 
 GUIButtonRef CreateIconAndTextButton(BUTTON_PICS* const Image, const wchar_t* const string, Font const font, const INT16 sForeColor, const INT16 sShadowColor, const INT16 sForeColorDown, const INT16 sShadowColorDown, const INT16 xloc, const INT16 yloc, const INT16 Priority, const GUI_CALLBACK ClickCallback)
 {
+    __android_log_print(ANDROID_LOG_INFO, "==TEST==", "** 3 *** MakeButton Call with %ls", string);
 	GUIButtonRef const b = QuickCreateButton(Image, xloc, yloc, Priority, ClickCallback);
 	CopyButtonText(b, string);
 	b->usFont           = font;
@@ -1065,6 +1072,7 @@ static void DrawTextOnButton(  const GUI_BUTTON* b);
 // Given a pointer to a GUI_BUTTON structure, draws the button on the screen.
 static void DrawButtonFromPtr(GUI_BUTTON* b)
 {
+    //__android_log_print(ANDROID_LOG_INFO, "==TEST==", "DrawButtonFromPtr");
 	// Draw the appropriate button according to button type
 	gbDisabledButtonStyle = GUI_BUTTON::DISABLED_STYLE_NONE;
 	switch (b->uiFlags & BUTTON_TYPES)
@@ -1351,8 +1359,10 @@ static void DrawIconOnButton(const GUI_BUTTON* b)
 // If a button has text attached to it, then it'll draw it last.
 static void DrawTextOnButton(const GUI_BUTTON* b)
 {
+
 	// If this button actually has a string to print
 	if (b->string == NULL) return;
+    __android_log_print(ANDROID_LOG_INFO, "==TEST==", "DrawTextOnButton called %ls//%s", b->string, b->string);
 
 	// Get the width and height of this button
 	INT32 const width  = b->W();
@@ -1517,15 +1527,18 @@ static void DrawTextOnButton(const GUI_BUTTON* b)
 		}
 		yp += b->bTextYSubOffSet;
 		xp += b->bTextXSubOffSet;
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "about to call DisplayWrappedString with %ls", b->string);
 		DisplayWrappedString(xp, yp, b->sWrappedWidth, 1, b->usFont, sForeColor, b->string, FONT_MCOLOR_BLACK, bJustified);
 	}
 	else
 	{
 		yp += b->bTextYSubOffSet;
 		xp += b->bTextXSubOffSet;
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "about to call MPrint with %ls", b->string);
 		MPrint(xp, yp, b->string);
 	}
 #else
+    __android_log_print(ANDROID_LOG_INFO, "==TEST==", "about to call MPrint with %s", b->string);
 	MPrint(xp, yp, b->string);
 #endif
 	// Restore the old text printing settings

@@ -21,17 +21,20 @@ INSTALL_MAN     ?= $(INSTALL) -m 444
 INSTALL_DATA    ?= $(INSTALL) -m 444
 
 
-SDL_CONFIG  ?= sdl-config
+#SDL_CONFIG  ?= ../sdl-config
 ifndef CFLAGS_SDL
-CFLAGS_SDL  := $(shell $(SDL_CONFIG) --cflags)
+CFLAGS_SDL  := $(shell -I~/JA2Android/pelyasdl/project/jni/application/../sdl-1.2/include -D_GNU_SOURCE=1 -D_REENTRANT)
 endif
 ifndef LDFLAGS_SDL
-LDFLAGS_SDL := $(shell $(SDL_CONFIG) --libs)
+LDFLAGS_SDL := $(shell -L~/JA2Android/android-ndk-r6-crystax-2/sources/crystax/libs/armeabi -L~/JA2Android/pelyasdl/project/jni/application/../../bin/ndk/local/armeabi -lsdl-1.2)
 endif
 
+CXX= ~/JA2Android/android-ndk-r6-crystax-2/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-g++
+CC = ~/JA2Android/android-ndk-r6-crystax-2/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi-gcc
 
-CFLAGS += $(CFLAGS_SDL)
-CFLAGS += -I Build
+CFLAGS += $(CFLAGS_SDL) 
+CFLAGS += -I~/JA2Android/android-ndk-r6-crystax-2/sources/crystax/include
+CFLAGS += -g -I Build
 CFLAGS += -I Build/Tactical
 CFLAGS += -I Build/Strategic
 CFLAGS += -I Build/Editor
@@ -41,6 +44,13 @@ CFLAGS += -I Build/Utils
 CFLAGS += -I Build/TileEngine
 CFLAGS += -I Build/TacticalAI
 CFLAGS += -I sgp
+#CFLAGS += -I openbsd-compat 
+#CFLAGS += -posix
+## EDITEDIT upper line was commented out
+
+# ---
+CFLAGS += -fshort-wchar
+# ---
 
 #CFLAGS += -Wall
 #CFLAGS += -W
@@ -103,15 +113,21 @@ CFLAGS += -D$(LNG)
 CFLAGS += -DSGPDATADIR=\"$(SGPDATADIR)\"
 
 CCFLAGS += $(CFLAGS)
+CCFLAGS += -I~/JA2Android/android-ndk-r6-crystax-2/sources/crystax/include
 CCFLAGS += -std=gnu99
 CCFLAGS += -Werror-implicit-function-declaration
 CCFLAGS += -Wimplicit-int
 CCFLAGS += -Wmissing-prototypes
-
+CCFLAGS += -posix
 CXXFLAGS += $(CFLAGS)
+
+# ---
+CXXFLAGS += -fshort-wchar
+# ---
 
 LDFLAGS += $(LDFLAGS_SDL)
 LDFLAGS += -lm
+LDFLAGS += -L~/JA2Android/android-ndk-r6-crystax-2/sources/crystax/libs/armeabi
 
 ifdef WITH_ZLIB
 LDFLAGS += -lz

@@ -840,7 +840,14 @@ static void UpdateMercInfo(void)
 		wchar_t	sMedicalString[40];
 
 		SPrintMoney(zTemp, gMercProfiles[gbCurrentSoldier].sMedicalDepositAmount);
-		swprintf( sMedicalString, lengthof(sMedicalString), L"%ls %ls", zTemp, CharacterInfo[AIM_MEMBER_MEDICAL_DEPOSIT_REQ] );
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+		char buf1[256];
+		char buf2[256];
+		my__wchar2char(zTemp, buf1);
+		my__wchar2char(CharacterInfo[AIM_MEMBER_MEDICAL_DEPOSIT_REQ], buf2);
+
+		//swprintf( sMedicalString, lengthof(sMedicalString), L"%ls %ls", buf1, buf2 );
+		swprintf( sMedicalString, lengthof(sMedicalString), L"%s %s", buf1, buf2 );
 
 		// If the string will be displayed in more then 2 lines, recenter the string
 		if (DisplayWrappedString(0, 0, AIM_MEDICAL_DEPOSIT_WIDTH, 2, AIM_FONT12ARIAL, AIM_M_COLOR_DYNAMIC_TEXT, sMedicalString, FONT_MCOLOR_BLACK, CENTER_JUSTIFIED | DONT_DISPLAY_TEXT) / GetFontHeight(AIM_FONT12ARIAL) > 2)
@@ -1296,7 +1303,13 @@ static void DisplayVideoConferencingDisplay(MERCPROFILESTRUCT const& p)
 	}
 	else
 	{
-		swprintf(sMercName, lengthof(sMercName), L"%ls %ls", VideoConfercingText[AIM_MEMBER_VIDEO_CONF_WITH], p.zName);
+	    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+		char buf1[256];
+		char buf2[256];
+		my__wchar2char(VideoConfercingText[AIM_MEMBER_VIDEO_CONF_WITH], buf1);
+		my__wchar2char(p.zName, buf2);
+		//swprintf(sMercName, lengthof(sMercName), L"%ls %ls", VideoConfercingText[AIM_MEMBER_VIDEO_CONF_WITH], p.zName);
+		swprintf(sMercName, lengthof(sMercName), L"%s %s", buf1, buf2);
 		DrawTextToScreen(sMercName, AIM_MEMBER_VIDEO_NAME_X, AIM_MEMBER_VIDEO_NAME_Y, 0, FONT12ARIAL, AIM_M_VIDEO_TITLE_COLOR, FONT_MCOLOR_BLACK, LEFT_JUSTIFIED);
 	}
 
@@ -1426,7 +1439,13 @@ static void DisplayMercChargeAmount(void)
 	wchar_t wTemp[50];
 	if (p.bMedicalDeposit)
 	{
-		swprintf(wTemp, lengthof(wTemp), L"%ls %ls", wDollarTemp, VideoConfercingText[AIM_MEMBER_WITH_MEDICAL]);
+	    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+		char buf1[256];
+		char buf2[256];
+		my__wchar2char(wDollarTemp, buf1);
+		my__wchar2char(VideoConfercingText[AIM_MEMBER_WITH_MEDICAL], buf2);
+		swprintf(wTemp, lengthof(wTemp), L"%s %s", buf1, buf2);
+		//swprintf(wTemp, lengthof(wTemp), L"%ls %ls", buf1, buf2);
 	}
 	else
 	{
@@ -1749,7 +1768,13 @@ static BOOLEAN DisplayTalkingMercFaceForVideoPopUp(const FACETYPE* const face)
 
 void DisplayTextForMercFaceVideoPopUp(const wchar_t* const pString)
 {
-	swprintf(gsTalkingMercText, lengthof(gsTalkingMercText), L"\"%ls\"", pString);
+    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+		char buf1[256];
+		//char buf2[256];
+		my__wchar2char(pString, buf1);
+		//my__wchar2char(VideoConfercingText[AIM_MEMBER_WITH_MEDICAL], buf2);
+	//swprintf(gsTalkingMercText, lengthof(gsTalkingMercText), L"\"%ls\"", buf1);
+	swprintf(gsTalkingMercText, lengthof(gsTalkingMercText), L"\"%s\"", buf1);
 
 	//Set the minimum time for the dialogue text to be present
 	usAimMercSpeechDuration =  wcslen( gsTalkingMercText ) * AIM_TEXT_SPEECH_MODIFIER;

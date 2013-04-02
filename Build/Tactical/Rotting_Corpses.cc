@@ -631,11 +631,11 @@ BOOLEAN TurnSoldierIntoCorpse(SOLDIERTYPE& s)
 	{
 		Corpse.sHeightAdjustment = s.sHeightAdjustment - WALL_HEIGHT;
 	}
-
-	SET_PALETTEREP_ID(Corpse.HeadPal,  s.HeadPal);
-	SET_PALETTEREP_ID(Corpse.VestPal,  s.VestPal);
-	SET_PALETTEREP_ID(Corpse.SkinPal,  s.SkinPal);
-	SET_PALETTEREP_ID(Corpse.PantsPal, s.PantsPal);
+	// MADE ARM SPECIFIC CHANGE HERE
+	SET_PALETTEREP_ID((char*)Corpse.HeadPal,  (char*)s.HeadPal);
+	SET_PALETTEREP_ID((char*)Corpse.VestPal,  (char*)s.VestPal);
+	SET_PALETTEREP_ID((char*)Corpse.SkinPal,  (char*)s.SkinPal);
+	SET_PALETTEREP_ID((char*)Corpse.PantsPal, (char*)s.PantsPal);
 
 	if (s.bCamo != 0)
 	{

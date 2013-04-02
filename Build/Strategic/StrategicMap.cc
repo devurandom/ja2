@@ -1619,10 +1619,17 @@ plain_sector:;
 		}
 	}
 
-	size_t const n = swprintf(buf, length, L"%c%d: %ls", 'A' + y - 1, x, add);
+    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[256];
+            my__wchar2char(add , buf1);
+	size_t const n = swprintf(buf, length, L"%c%d: %s", 'A' + y - 1, x, buf1);
+	//size_t const n = swprintf(buf, length, L"%c%d: %ls", 'A' + y - 1, x, add);
 	if (detailed && mine_index != -1)
 	{ // Append "Mine"
-		swprintf(buf + n, length - n, L" %ls", pwMineStrings[0]);
+		char buf2[256];
+            my__wchar2char(pwMineStrings[0], buf2);
+		swprintf(buf + n, length - n, L" %s", buf2);
+		//swprintf(buf + n, length - n, L" %ls", pwMineStrings[0]);
 	}
 #endif
 }

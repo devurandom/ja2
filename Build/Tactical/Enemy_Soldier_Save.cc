@@ -755,10 +755,11 @@ void NewWayOfSavingEnemyAndCivliansToTempFile(INT16 const sSectorX, INT16 const 
 		memcpy(dp->sPatrolGrid, s.usPatrolGrid, sizeof(dp->sPatrolGrid));
 
 		// Copy colors for soldier based on the body type.
-		strcpy(dp->HeadPal,  s.HeadPal);
-		strcpy(dp->VestPal,  s.VestPal);
-		strcpy(dp->SkinPal,  s.SkinPal);
-		strcpy(dp->PantsPal, s.PantsPal);
+		// MADE ARM SPECIFIC CHANGE HERE
+		strcpy((char*)dp->HeadPal,  (char*)s.HeadPal);
+		strcpy((char*)dp->VestPal,  (char*)s.VestPal);
+		strcpy((char*)dp->SkinPal,  (char*)s.SkinPal);
+		strcpy((char*)dp->PantsPal, (char*)s.PantsPal);
 
 		// Copy soldier's inventory
 		memcpy(dp->Inv, s.inv, sizeof(dp->Inv));

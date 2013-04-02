@@ -404,7 +404,13 @@ static void DisplayMercsStats(MERCPROFILESTRUCT const& p)
 
 	const UINT16 x = MERC_STATS_SECOND_COL_X + StringPixLength(salary, MERC_NAME_FONT) + 1;
 	wchar_t sString[128];
-	swprintf(sString, lengthof(sString), L"%d %ls", p.sSalary, MercInfo[MERC_FILES_PER_DAY]);
+			// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[512];
+                    //char buf2[512];
+                    my__wchar2char(MercInfo[MERC_FILES_PER_DAY], buf1);
+                    //my__wchar2char(pWebPagesTitles[iIndex], buf2);
+	//swprintf(sString, lengthof(sString), L"%d %ls", p.sSalary, buf1);
+	swprintf(sString, lengthof(sString), L"%d %s", p.sSalary, buf1);
 	DrawTextToScreen(sString, x, y2, 95, MERC_NAME_FONT, MERC_DYNAMIC_STATS_COLOR, FONT_MCOLOR_BLACK, RIGHT_JUSTIFIED);
 }
 

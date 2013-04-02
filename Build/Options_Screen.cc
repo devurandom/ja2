@@ -39,6 +39,8 @@
 #include "VSurface.h"
 #include "WorldMan.h"
 
+#include <android/log.h>
+
 
 #define		OPT_MAIN_FONT													FONT12ARIAL
 #define		OPT_MAIN_COLOR												OPT_BUTTON_ON_COLOR//FONT_MCOLOR_WHITE
@@ -222,8 +224,9 @@ ScreenID OptionsScreenHandle()
 }
 
 
-static GUIButtonRef MakeButton(INT16 x, GUI_CALLBACK click, const wchar_t* text)
+static GUIButtonRef MakeButton(INT16 x, GUI_CALLBACK click, const wchar_t* const text)
 {
+    __android_log_print(ANDROID_LOG_INFO, "==TEST==", "** 2 *** MakeButton Call with %ls", text);
 	return CreateIconAndTextButton(giOptionsButtonImages, text, OPT_BUTTON_FONT, OPT_BUTTON_ON_COLOR, DEFAULT_SHADOW, OPT_BUTTON_OFF_COLOR, DEFAULT_SHADOW, x, OPT_BTN_Y, MSYS_PRIORITY_HIGH, click);
 }
 
@@ -269,6 +272,8 @@ static void EnterOptionsScreen(void)
 
 	giOptionsButtonImages = LoadButtonImage(INTERFACEDIR "/optionscreenaddons.sti", 2, 3);
 
+
+
 	//Save game button
 	guiOptGotoSaveGameBtn = MakeButton(OPT_SAVE_BTN_X, BtnOptGotoSaveGameCallback, zOptionsText[OPT_SAVE_GAME]);
 	guiOptGotoSaveGameBtn->SpecifyDisabledStyle(GUI_BUTTON::DISABLED_STYLE_HATCHED);
@@ -277,6 +282,7 @@ static void EnterOptionsScreen(void)
 		DisableButton( guiOptGotoSaveGameBtn );
 	}
 
+    __android_log_print(ANDROID_LOG_INFO, "==TEST==", "** 1 *** MakeButton Call with %ls", L"LOAD GAME");
 	guiOptGotoLoadGameBtn = MakeButton(OPT_LOAD_BTN_X, BtnOptGotoLoadGameCallback, zOptionsText[OPT_LOAD_GAME]);
 	guiQuitButton         = MakeButton(OPT_QUIT_BTN_X, BtnOptQuitCallback,         zOptionsText[OPT_MAIN_MENU]);
 	guiDoneButton         = MakeButton(OPT_DONE_BTN_X, BtnDoneCallback,            zOptionsText[OPT_DONE]);

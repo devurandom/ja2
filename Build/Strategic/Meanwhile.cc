@@ -31,6 +31,7 @@
 #include "Squads.h"
 #include "Random.h"
 
+#include "Font.h"
 
 #define MAX_MEANWHILE_PROFILES	10
 
@@ -247,7 +248,11 @@ static void BringupMeanwhileBox(void)
 #ifdef JA2TESTVERSION
 	swprintf(zStr, lengthof(zStr), L"Meanwhile..... ( %hs : Remember to make sure towns are controlled if required by script )", gzMeanwhileStr[gCurrentMeanwhileDef.ubMeanwhileID]);
 #else
-	swprintf( zStr, lengthof(zStr), L"%ls.....", pMessageStrings[ MSG_MEANWHILE ] );
+    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[256];
+            my__wchar2char(pMessageStrings[ MSG_MEANWHILE ] , buf1);
+	swprintf( zStr, lengthof(zStr), L"%s.....", buf1 );
+	//swprintf( zStr, lengthof(zStr), L"%ls.....", pMessageStrings[ MSG_MEANWHILE ] );
 #endif
 
 	MessageBoxFlags const flags =

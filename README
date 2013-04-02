@@ -1,0 +1,173 @@
+                            NO WARRANTY
+
+    BECAUSE THE PATCH/PROGRAMM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
+    FOR THE PATCH/PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.  EXCEPT WHEN
+    OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES
+    PROVIDE THE PATCH/PROGRAM "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
+    OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+    MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS
+    TO THE QUALITY AND PERFORMANCE OF THE PATCH/PROGRAM IS WITH YOU.  SHOULD THE
+    PATCH/PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,
+    REPAIR OR CORRECTION.
+
+
+
+
+Hi there,
+
+and congratulations on being courageous enough to try out my Ja2 Android port. 
+(Use it at your own risk!)
+
+This port is written for FUN and EDUCATION not for profit. I do not charge money 
+for it, and neither should anyone else. The original game is still copyrighted 
+and you need the original game to use this port (surprise!).
+
+Just a COPYRIGHT WARNING: the copyright on Ja2 is currently held by an active 
+company which might sue you, if you try to upload this to the market and charge 
+money for it.
+Offering it for free in the market might be okay, but please check it with the
+copyright holders first!!!
+
+Releasing builds/modified sources for education/non-profit is fine by the sourcecode
+license. BUT: I integrated some GPL'ed code in the patch for reference only, THAT IS NOT
+INCLUDED IN MY BINARY RELEASES AND DOES THEREFORE NOT VIOLATE GPL (specific #ifdef 
+was inactive). 
+But be aware that if you distribute changed versions of my patched code, that you
+either remove TORVALDS BLOCK or just distribute a patch like I did here.
+
+The code is rigged and hacked all over the place to work around the wchar_t flaws
+introduced by androids NDK and the odd style of the original JaggedAlliance2 soucecode.
+It was the hardest port I've ever done and some parts of the code might not meet
+my usual style and quality. Sorry about that, but I did this in my freetime and had
+to rush through some parts.
+
+What I did:
+- fixed ARM specific issues
+- fixed most wchar_t on AndroidNDK related issues 
+  (6 months of hunting broken pointers through the whole code)
+- fixed most SDL flaws to be compatible with pelyaSDL (nasty search - easy fix)
+- destroyed support for all other versions except ENGLISH - sorry :( 
+- fixed file finding issues on Android 
+- fixed file io issues with Android
+- added some note to the main screen (only to keep players safe!)
+
+The game should be playable, though I've not played it through on my device. If you
+encounter bugs that prevent you from finishing the game, please let me know in the
+forum (bearpit/jagalaxy/anddev not 4pda - I don't speak russian).
+
+Special thanks here go to »Oleg "legion" Ilyasov«  to get me coding again. If this 
+cool guy had not motivated me enough, I never would have made it this far! So: THANKS!
+
+Also special thanks go to 'jaa' who posted small patch with a great effect! With 'jaa's
+patch you can enjoy ja2android even on low-end android devices without speed problems!
+
+Also thanks go to all testers from the forums where the port was released! Without all
+of you, I never would have found some really nasty bugs! 
+
+Some veterans at BearsPit where also very helpful during the whole project: thank you very much!
+
+And also thanks to all I forgot to mention here! (It's just RC2 not stable1.0 ;))
+
+So let's get to business:
+
+I've (hopefully) included all neccessary stuff, speaking of which:
+
+[SHA256]  [FILE]
+
+d33f86d738734e075501206f80f51ea04ce709c201027bb2304fdde6ae050881  AndroidData/ja2.zip
+9ff72e9789ec547d12a8da3727953362e5edc11b48f34d9f885c896b96d9d4f5  ja2_strac_svnr7072_to_ja2android_rc2.patch
+7d0a909160635ad160887b23182d4770928efc8001cb4897a3616aa5edac64ef  AndroidBuild.sh
+9d797f9a95ffe7027785f7f89fba4c282e5b49f70b318c2255f2af05021ddacd  icon.png
+99350436bcf4b2fcc0d18952dc7b69967e684993ce67f76465184ab15ea60cb1  AndroidAppSettings.cfg
+ce0ea538aeea0467de1d3732fd2a103f0be7e22b5e3c1959ed5a62e891457477  SFI Source Code license agreement.txt
+
+The patch should be applied to Revision7072 from svn://tron.homeunix.org/ja2/trunk
+Should for some reason this SVN come offline, you can try dropping me a mail at
+(omnigraphical @ gmail . com) but I can't promise I'll answer.
+Questions regarding installation/patching/playing/whatever should be asked in
+the Ja2Galaxy Forum or anddev.org.
+
+Building is a little complicated:
+
+ATTENTION: i forgot to deactivate the drop_all mod in the patch, please change droprates
+back to normal if you want 100%pure Stracciatella feeling!
+
+
+- Create an android build environment on you machine - google will help you with that.
+(as the time of writing the NDKr6 is the most recent available NDK)
+- You should use Crystax Toolchain instead. I used CrystaX-r6-2.
+
+- Obtain the freshest pelyaSDL from github here https://github.com/pelya/commandergenius
+I used version up to commit 8e16ec9f333ca3bbe11b15e1d2e0ae9e9d4b64be
+(Beware: pelya breaks the whole thing sometimes...)
+
+- follow pelyas instructions on how to compile your own application
+  -  for sources you should of course use the checked out SVN of JA2 Stracciatella
+     patched with the supplied patch.
+     (run 'patch -p1 -i ja2_strac_svnr7072_to_ja2android_rc2.patch')
+NOTE: I have not tested patching it with the new patch - but it should work. (you only need this patch!)
+  - copy over the Icon and the two build and config files
+
+- run build.sh from the pelya trunk, grab your phone and play some Exult while JA2 is
+  building.
+
+- you should now have a .apk file you can install on your phone
+
+- Don't forget to move over your JA2 Data folder before trying to run the game.
+  YES, OF COURSE YOU NEED TO OWN THE ORIGINAL GAME - it should be still in the stores!
+
+- Hopefully: have fun!
+
+
+~omnigraphical
+
+LICENSE NOTE:
+Jagged Alliance has its very own SirTech Open Source License, you should get a copy
+of the license agreement when checking out from SVN. Or along with the archive where 
+this file was in.
+
+The small TORVALDS block I used for swprintf-reference is only contained in the patch
+and not in the release. But it is licensed under GNU-GPL - check the Free Software Foundation
+if you do not know what that is.
+
+pelyaSDL/SDL have their own library license, just check their sites! 
+
+I had to include pieces of code from the bsd-compat folder in the openssh sources, because
+the google compiler does not know about glob.h and glob.c
+This code is under BSD-License:
+
+ * Copyright (c) 1989, 1993
+ *      The Regents of the University of California.  All rights reserved.
+ *
+ * This code is derived from software contributed to Berkeley by
+ * Guido van Rossum.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. Neither the name of the University nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ *
+ *      @(#)glob.h      8.1 (Berkeley) 6/2/93
+
+
+
+

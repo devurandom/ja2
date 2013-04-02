@@ -7,8 +7,9 @@
 static SGPVObject* LoadPortrait(MERCPROFILESTRUCT const& p, char const* const subdir)
 {
 	SGPFILENAME filename;
-	snprintf(filename, lengthof(filename), FACESDIR "/%s%02d.sti", subdir, p.ubFaceIndex);
-	return AddVideoObjectFromFile(filename);
+	// MADE ARM SPECIFIC CHANGE HERE
+	snprintf((char*)filename, lengthof(filename), FACESDIR "/%s%02d.sti", subdir, p.ubFaceIndex);
+	return AddVideoObjectFromFile((char*)filename);
 }
 
 

@@ -868,7 +868,13 @@ static void ProcessTransactionString(wchar_t pString[], const size_t Length, con
 static void DisplayFinancePageNumberAndDateRange(void)
 {
 	SetFontAttributes(FINANCE_TEXT_FONT, FONT_BLACK, NO_SHADOW);
-	mprintf(PAGE_NUMBER_X, PAGE_NUMBER_Y, L"%ls %d / %d", pFinanceHeaders[5], iCurrentPage + 1, guiLastPageInRecordsList + 2);
+				// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+		char buf1[512];
+		//char buf2[256];
+		my__wchar2char(pFinanceHeaders[5], buf1);
+		//my__wchar2char(VideoConfercingText[AIM_MEMBER_WITH_MEDICAL], buf2);
+	//mprintf(PAGE_NUMBER_X, PAGE_NUMBER_Y, L"%ls %d / %d", buf1, iCurrentPage + 1, guiLastPageInRecordsList + 2);
+	mprintf(PAGE_NUMBER_X, PAGE_NUMBER_Y, L"%s %d / %d", buf1, iCurrentPage + 1, guiLastPageInRecordsList + 2);
 	SetFontShadow(DEFAULT_SHADOW);
 }
 

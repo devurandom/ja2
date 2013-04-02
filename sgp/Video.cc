@@ -128,6 +128,7 @@ void InitializeVideoManager(void)
 {
 	DebugMsg(TOPIC_VIDEO, DBG_LEVEL_0, "Initializing the video manager");
 
+
 	SDL_WM_SetCaption(APPLICATION_NAME, NULL);
 	ClippingRect.iLeft = 0;
 	ClippingRect.iTop = 0;
@@ -530,6 +531,11 @@ static void TakeScreenshot()
 
 
 static void SnapshotSmall(void);
+    // suggest patch by 'jaa' from bears pit applied
+
+    // ANDROID DEBUG DEBUG: always force full redraw
+//    gfForceFullScreenRefresh = TRUE;
+
 
 
 void RefreshScreen(void)
@@ -611,31 +617,31 @@ void RefreshScreen(void)
 	dst.x = MousePos.iX - gsMouseCursorXOffset;
 	dst.y = MousePos.iY - gsMouseCursorYOffset;
 	SDL_BlitSurface(MouseCursor, &src, ScreenBuffer, &dst);
-	SDL_UpdateRects(ScreenBuffer, 1, &dst);
+//	SDL_UpdateRects(ScreenBuffer, 1, &dst);
 	SDL_UpdateRects(ScreenBuffer, 1, &MouseBackground);
 	MouseBackground = dst;
 
-	if (gfForceFullScreenRefresh)
-	{
-		SDL_UpdateRect(ScreenBuffer, 0, 0, 0, 0);
-	}
-	else
-	{
-		SDL_UpdateRects(ScreenBuffer, guiDirtyRegionCount, DirtyRegions);
-
-		for (UINT32 i = 0; i < guiDirtyRegionExCount; i++)
-		{
-			SDL_Rect* r = &DirtyRegionsEx[i];
-			if (scrolling)
-			{
-				if (r->y <= gsVIEWPORT_WINDOW_END_Y && r->y + r->h <= gsVIEWPORT_WINDOW_END_Y)
-				{
-					continue;
-				}
-			}
-			SDL_UpdateRects(ScreenBuffer, 1, r);
-		}
-	}
+//	if (gfForceFullScreenRefresh)
+//	{
+//		SDL_UpdateRect(ScreenBuffer, 0, 0, 0, 0);
+//	}
+//	else
+//	{
+//		SDL_UpdateRects(ScreenBuffer, guiDirtyRegionCount, DirtyRegions);
+//
+//		for (UINT32 i = 0; i < guiDirtyRegionExCount; i++)
+//		{
+//			SDL_Rect* r = &DirtyRegionsEx[i];
+//			if (scrolling)
+//			{
+//				if (r->y <= gsVIEWPORT_WINDOW_END_Y && r->y + r->h <= gsVIEWPORT_WINDOW_END_Y)
+//				{
+//					continue;
+//				}
+//			}
+//			SDL_UpdateRects(ScreenBuffer, 1, r);
+//		}
+//	}
 
 	gfForceFullScreenRefresh = FALSE;
 	guiDirtyRegionCount = 0;

@@ -405,6 +405,9 @@ static void RenderMainMenu(void)
 #	undef TEST_FONT
 #else
 	DrawTextToScreen(gzCopyrightText, 0, INTERFACE_HEIGHT - 15, INTERFACE_WIDTH, FONT10ARIAL, FONT_MCOLOR_WHITE, FONT_MCOLOR_BLACK, CENTER_JUSTIFIED);
+	DrawTextToScreen(L"Buy the original game if you don't already own it. Support the developers!", 0, INTERFACE_HEIGHT - 30, INTERFACE_WIDTH, FONT10ARIAL, FONT_MCOLOR_WHITE, FONT_MCOLOR_BLACK, CENTER_JUSTIFIED);
+	DrawTextToScreen(L"This engine-port is open source. If you paid money for this, you have been tricked.", 0, (INTERFACE_HEIGHT/2) - 60, INTERFACE_WIDTH, FONT10ARIAL, FONT_MCOLOR_WHITE, FONT_MCOLOR_BLACK, CENTER_JUSTIFIED);
+	DrawTextToScreen(L"This app should never ask for more rights than sdcard and vibration!", 0, (INTERFACE_HEIGHT/2) - 25, INTERFACE_WIDTH, FONT10ARIAL, FONT_MCOLOR_WHITE, FONT_MCOLOR_BLACK, CENTER_JUSTIFIED);
 #endif
 }
 

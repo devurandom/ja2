@@ -99,6 +99,8 @@
 #	include "Strategic_Status.h"
 #endif
 
+#include <android/log.h>
+
 
 #define MAX_SORT_METHODS					6
 
@@ -865,6 +867,7 @@ static void DrawCharacterInfo(SOLDIERTYPE const& s)
 		name     = p.zName;
 	}
 	DrawStringCentered(nickname, PIC_NAME_X,  PIC_NAME_Y,  PIC_NAME_WID,  PIC_NAME_HEI,  CHAR_FONT);
+	//DrawStringCentered(L"CORRECTIO", PIC_NAME_X,  PIC_NAME_Y,  PIC_NAME_WID,  PIC_NAME_HEI,  CHAR_FONT);
 	DrawStringCentered(name,     CHAR_NAME_X, CHAR_NAME_Y, CHAR_NAME_WID, CHAR_NAME_HEI, CHAR_FONT);
 
 	wchar_t const* const assignment =
@@ -948,7 +951,16 @@ static void DrawCharacterInfo(SOLDIERTYPE const& s)
 				// Calculate the exact time left on the contract (e.g. 1.8 days)
 				float          const time_left = time_remaining / (60 * 24.0);
 				wchar_t const* const days      = gpStrategicString[STR_PB_DAYS_ABBREVIATION];
-				swprintf(buf, lengthof(buf), L"%.1f%ls/%d%ls", time_left, days, s.iTotalContractLength, days);
+				    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                            char buf1[64];
+                            char buf2[64];
+                            //char buf3[128];
+                            //char buf4[256];
+                            my__wchar2char( days, buf1);
+                            my__wchar2char( days, buf2);
+                            //my__wchar2char( gsTimeStrings[2], buf3);
+				//swprintf(buf, lengthof(buf), L"%.1f%ls/%d%ls", time_left, days, s.iTotalContractLength, days);
+				swprintf(buf, lengthof(buf), L"%.1f%s/%d%s", time_left, buf1 , s.iTotalContractLength,buf2);
 			}
 			else
 			{ // Less than a day, display hours left in red
@@ -956,7 +968,16 @@ static void DrawCharacterInfo(SOLDIERTYPE const& s)
 				time_remaining /= 60;
 				wchar_t const* const hours = gpStrategicString[STR_PB_HOURS_ABBREVIATION];
 				wchar_t const* const days  = gpStrategicString[STR_PB_DAYS_ABBREVIATION];
-				swprintf(buf, lengthof(buf), L"%d%ls/%d%ls", time_remaining, hours, s.iTotalContractLength, days);
+				 // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                            char buf1[64];
+                            char buf2[64];
+                            //char buf3[128];
+                            //char buf4[256];
+                            my__wchar2char( hours, buf1);
+                            my__wchar2char( days, buf2);
+                            //my__wchar2char( gsTimeStrings[2], buf3);
+				//swprintf(buf, lengthof(buf), L"%d%ls/%d%ls", time_remaining, hours, s.iTotalContractLength, days);
+				swprintf(buf, lengthof(buf), L"%d%s/%d%s", time_remaining, buf1, s.iTotalContractLength, buf2);
 			}
 			contract = buf;
 		}
@@ -964,7 +985,16 @@ static void DrawCharacterInfo(SOLDIERTYPE const& s)
 		{
 			INT32          const been_hired_for = GetWorldTotalMin() / NUM_MIN_IN_DAY - s.iStartContractTime;
 			wchar_t const* const days           = gpStrategicString[STR_PB_DAYS_ABBREVIATION];
-			swprintf(buf, lengthof(buf), L"%d%ls/%d%ls", p.iMercMercContractLength, days, been_hired_for, days);
+							 // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                            //char buf1[64];
+                            char buf2[64];
+                            //char buf3[128];
+                            //char buf4[256];
+                            //my__wchar2char( hours, buf1);
+                            my__wchar2char( days, buf2);
+                            //my__wchar2char( gsTimeStrings[2], buf3);
+			//swprintf(buf, lengthof(buf), L"%d%ls/%d%ls", p.iMercMercContractLength, days, been_hired_for, days);
+			swprintf(buf, lengthof(buf), L"%d%s/%d%s", p.iMercMercContractLength, buf2, been_hired_for, buf2);
 			contract = buf;
 		}
 	}
@@ -1171,16 +1201,31 @@ static void DisplayGroundEta(void)
 		// show hours and minutes
 		UINT Minutes = iTotalTime % 60;
 		UINT Hours   = iTotalTime / 60;
-		mprintf(CLOCK_MIN_X_START  - 5, CLOCK_Y_START, L"%2u%ls", Minutes, gsTimeStrings[1]);
-		mprintf(CLOCK_HOUR_X_START - 8, CLOCK_Y_START, L"%2u%ls", Hours,   gsTimeStrings[0]);
+		 // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                            char buf1[64];
+                            char buf2[64];
+                            my__wchar2char( gsTimeStrings[1], buf1);
+                            my__wchar2char( gsTimeStrings[0], buf2);
+
+		//mprintf(CLOCK_MIN_X_START  - 5, CLOCK_Y_START, L"%2u%ls", Minutes, gsTimeStrings[1]);
+		//mprintf(CLOCK_HOUR_X_START - 8, CLOCK_Y_START, L"%2u%ls", Hours,   gsTimeStrings[0]);
+		mprintf(CLOCK_MIN_X_START  - 5, CLOCK_Y_START, L"%2u%s", Minutes, buf1);
+		mprintf(CLOCK_HOUR_X_START - 8, CLOCK_Y_START, L"%2u%s", Hours,   buf2);
 	}
 	else
 	{
 		// show days and hours
 		UINT Hours = iTotalTime / 60 % 24;
 		UINT Days  = iTotalTime / (60 * 24);
-		mprintf(CLOCK_MIN_X_START  - 5, CLOCK_Y_START, L"%2u%ls", Hours, gsTimeStrings[0]);
-		mprintf(CLOCK_HOUR_X_START - 9, CLOCK_Y_START, L"%2u%ls", Days,  gsTimeStrings[3]);
+				 // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                            char buf1[64];
+                            char buf2[64];
+                            my__wchar2char( gsTimeStrings[0], buf1);
+                            my__wchar2char( gsTimeStrings[3], buf2);
+		mprintf(CLOCK_MIN_X_START  - 5, CLOCK_Y_START, L"%2u%s", Hours, buf1);
+		mprintf(CLOCK_HOUR_X_START - 9, CLOCK_Y_START, L"%2u%s", Days,  buf2);
+        //mprintf(CLOCK_MIN_X_START  - 5, CLOCK_Y_START, L"%2u%ls", Hours, gsTimeStrings[0]);
+		//mprintf(CLOCK_HOUR_X_START - 9, CLOCK_Y_START, L"%2u%ls", Days,  gsTimeStrings[3]);
 	}
 }
 
@@ -1355,8 +1400,33 @@ static void DisplayCharacterList(void)
 		UINT16 y = Y_START + i * (Y_SIZE + Y_OFFSET) + 1;
 		if (i >= FIRST_VEHICLE) y += 6;
 
+    // HACK  HACK  HACK to display correct nickname in list. dont know why it is saved wrong...
+            ProfileID const __pid = s.ubProfile;
+            //if (pid == NO_PROFILE) return;
+            MERCPROFILESTRUCT const& __p = GetProfile(__pid);
+            wchar_t const* __nickname;
+            if (s.uiStatusFlags & SOLDIER_VEHICLE)
+            {
+                VEHICLETYPE const& __v = GetVehicle(s.bVehicleID);
+                __nickname = pShortVehicleStrings[__v.ubVehicleType];
+                //name     = pVehicleStrings[     __v.ubVehicleType];
+            }
+            else
+            {
+                __nickname = __p.zNickname;
+                //name     = p.zName;
+            }
+
 		// Name
-		DrawStringCentered(s.name, NAME_X + 1, y, NAME_WIDTH, Y_SIZE, MAP_SCREEN_FONT);
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+        //char buf4[256];
+        //my__wchar2char( s.name, buf4);
+        //__android_log_print(ANDROID_LOG_INFO, "==TEST==", "s.name is \"%s\"", buf4);
+		//DrawStringCentered(L"FOOBAR", NAME_X + 1, y, NAME_WIDTH, Y_SIZE, MAP_SCREEN_FONT);
+		// NOTE: above logging showed that s.name does contain only the first letter of the nickname
+		//       we now need to find where it is falsely set.
+		DrawStringCentered(__nickname, NAME_X + 1, y, NAME_WIDTH, Y_SIZE, MAP_SCREEN_FONT);
+		//DrawStringCentered(s.name, NAME_X + 1, y, NAME_WIDTH, Y_SIZE, MAP_SCREEN_FONT);
 
 		wchar_t str[32];
 
@@ -7874,7 +7944,13 @@ static void ConvertMinTimeToETADayHourMinString(const UINT32 uiTimeInMin, wchar_
 	// there ain't enough room to show both the day and ETA: and without ETA it's confused as the current time
 //	swprintf(sString, L"%ls %ls %d, %02d:%02d", pEtaString, pDayStrings, uiDay, uiHour, uiMin);
 //	swprintf(sString, L"%ls %d, %02d:%02d", pDayStrings, uiDay, uiHour, uiMin);
-	swprintf(sString, Length, L"%ls %02d:%02d", pEtaString, uiHour, uiMin);
+				 // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                            char buf1[128];
+                            //char buf2[64];
+                            my__wchar2char( pEtaString, buf1);
+                            //my__wchar2char( gsTimeStrings[3], buf2);
+	//swprintf(sString, Length, L"%ls %02d:%02d", pEtaString, uiHour, uiMin);
+	swprintf(sString, Length, L"%s %02d:%02d", buf1, uiHour, uiMin);
 }
 
 
@@ -8426,7 +8502,15 @@ void GetMapscreenMercLocationString(SOLDIERTYPE const& s, wchar_t* const buf, si
 	}
 	else
 	{ // Put parentheses around it when he's between sectors
-		swprintf(buf, n, s.fBetweenSectors ? L"(%ls%ls%ls)" : L"%ls%ls%ls", pMapVertIndex[s.sSectorY], pMapHortIndex[s.sSectorX], pMapDepthIndex[s.bSectorZ]);
+	    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+        char buf1[64];
+        char buf2[64];
+        char buf3[64];
+        my__wchar2char(  pMapVertIndex[s.sSectorY], buf1);
+        my__wchar2char( pMapHortIndex[s.sSectorX], buf2);
+        my__wchar2char( pMapDepthIndex[s.bSectorZ], buf3);
+		swprintf(buf, n, s.fBetweenSectors ? L"(%s%s%s)" : L"%s%s%s", buf1, buf2, buf3);
+		//swprintf(buf, n, s.fBetweenSectors ? L"(%ls%ls%ls)" : L"%ls%ls%ls", pMapVertIndex[s.sSectorY], pMapHortIndex[s.sSectorX], pMapDepthIndex[s.bSectorZ]);
 	}
 }
 
@@ -8463,7 +8547,15 @@ void GetMapscreenMercDestinationString(SOLDIERTYPE const& s, wchar_t* const buf,
 			x = g.ubNextX;
 			y = g.ubNextY;
 		}
-		swprintf(buf, n, L"%ls%ls", pMapVertIndex[y], pMapHortIndex[x]);
+        // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+        char buf1[64];
+        char buf2[64];
+        //char buf3[64];
+        my__wchar2char(  pMapVertIndex[y], buf1);
+        my__wchar2char( pMapHortIndex[x], buf2);
+        //my__wchar2char( pMapDepthIndex[s.bSectorZ], buf3);
+		swprintf(buf, n, L"%s%s", buf1, buf2);
+		//swprintf(buf, n, L"%ls%ls", pMapVertIndex[y], pMapHortIndex[x]);
 	}
 	else
 	{

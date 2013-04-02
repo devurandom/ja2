@@ -65,7 +65,7 @@ typedef signed short    INT16;
 typedef float           FLOAT;
 typedef double          DOUBLE;
 // strings
-typedef char			      CHAR8;
+typedef char			      CHAR8; // ARM defaults to unsigned, so set to signed!
 typedef wchar_t					CHAR16;
 // other
 typedef unsigned char		BOOLEAN;

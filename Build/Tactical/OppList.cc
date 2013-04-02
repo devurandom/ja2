@@ -2817,7 +2817,11 @@ void RadioSightings(SOLDIERTYPE* const pSoldier, SOLDIERTYPE* const about, UINT8
 static void GHeader(INT32 const y, wchar_t const* const str)
 {
 	SetFontShade(LARGEFONT1, FONT_SHADE_GREEN);
-	gprintf(0, y, L"%ls", str);
+	 // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+    char buf[512];
+    my__wchar2char( str, buf);
+	gprintf(0, y, L"%s", buf);
+	//gprintf(0, y, L"%ls", str);
 	SetFontShade(LARGEFONT1, FONT_SHADE_NEUTRAL);
 }
 
@@ -2839,7 +2843,11 @@ static void GPrintStat(INT32 const x, INT32 const y, wchar_t const* const header
 static void GPrintStat(INT32 const x, INT32 const y, wchar_t const* const header, wchar_t const* const val)
 {
 	GHeader(y, header);
-	gprintf(x, y, L"%ls", val);
+	 // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+    char buf[512];
+    my__wchar2char(  val, buf);
+	gprintf(x, y, L"%s", buf);
+	//gprintf(x, y, L"%ls", val);
 }
 
 
@@ -2923,7 +2931,11 @@ static void MPrintStat(INT32 const x, INT32 const y, wchar_t const* const header
 static void MPrintStat(INT32 const x, INT32 const y, wchar_t const* const header, wchar_t const* const val)
 {
 	MHeader(y, header);
-	mprintf(x, y, L"%ls", val);
+	 // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+    char buf[512];
+    my__wchar2char(  val, buf);
+	mprintf(x, y, L"%s", buf);
+	//mprintf(x, y, L"%ls", val);
 }
 
 
@@ -3293,11 +3305,19 @@ static void WriteQuantityAndAttachments(OBJECTTYPE const* o, INT32 const y)
 
 		if (o->ubNumberOfObjects > 1)
 		{ //everything
-			gprintf(320, y, L"%d%%  Qty:  %d%ls", o->bStatus[0], o->ubNumberOfObjects, attachments);
+		     // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf[512];
+            my__wchar2char(  attachments, buf);
+			gprintf(320, y, L"%d%%  Qty:  %d%s", o->bStatus[0], o->ubNumberOfObjects, buf);
+			//gprintf(320, y, L"%d%%  Qty:  %d%ls", o->bStatus[0], o->ubNumberOfObjects, attachments);
 		}
 		else
 		{ //condition and attachments
-			gprintf(320, y, L"%d%%%ls", o->bStatus[0], attachments);
+		     // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf[512];
+            my__wchar2char(  attachments, buf);
+			gprintf(320, y, L"%d%%%s", o->bStatus[0], buf);
+			//gprintf(320, y, L"%d%%%ls", o->bStatus[0], attachments);
 		}
 	}
 }
@@ -3307,7 +3327,11 @@ static void PrintItem(INT32 const y, wchar_t const* const header, OBJECTTYPE con
 {
 	GHeader(y, header);
 	if (!o->usItem) return;
-	gprintf(150, y, L"%ls", ShortItemNames[o->usItem]);
+	 // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf[512];
+            my__wchar2char(  ShortItemNames[o->usItem], buf);
+	gprintf(150, y, L"%s", buf);
+	//gprintf(150, y, L"%ls", ShortItemNames[o->usItem]);
 	WriteQuantityAndAttachments(o, y);
 }
 

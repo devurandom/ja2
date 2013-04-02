@@ -1604,7 +1604,7 @@ try
 		SaveSchedules(f);
 	}
 
-	strlcpy(g_filename, filename, lengthof(g_filename));
+	my_strlcpy(g_filename, filename, lengthof(g_filename));
 	return TRUE;
 }
 catch (...) { return FALSE; }
@@ -2462,7 +2462,7 @@ try
 	gfWorldLoaded = TRUE;
 
 #ifdef JA2EDITOR
-	strlcpy(g_filename, filename, lengthof(g_filename));
+	my_strlcpy(g_filename, filename, lengthof(g_filename));
 #endif
 
 #ifdef JA2TESTVERSION

@@ -5282,7 +5282,14 @@ static void CreateSquadBox(void)
 	{
 		// get info about current squad and put in  string
 		wchar_t buf[64];
-		swprintf(buf, lengthof(buf), L"%ls ( %d/%d )", pSquadMenuStrings[i], NumberOfPeopleInSquad(i), NUMBER_OF_SOLDIERS_PER_SQUAD);
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                            char buf1[128];
+                            //char buf2[256];
+                            //char buf3[256];
+                            //char buf4[256];
+                            my__wchar2char( pSquadMenuStrings[i], buf1);
+		//swprintf(buf, lengthof(buf), L"%ls ( %d/%d )", pSquadMenuStrings[i], NumberOfPeopleInSquad(i), NUMBER_OF_SOLDIERS_PER_SQUAD);
+		swprintf(buf, lengthof(buf), L"%s ( %d/%d )", buf1, NumberOfPeopleInSquad(i), NUMBER_OF_SOLDIERS_PER_SQUAD);
 		AddMonoString(box, buf);
 	}
 
@@ -5422,7 +5429,15 @@ void CreateContractBox(const SOLDIERTYPE* const s)
 			wchar_t sDollarString[50];
 			SPrintMoney(sDollarString, salary);
 			wchar_t sString[50];
-			swprintf(sString, lengthof(sString), L"%ls ( %ls )", pContractStrings[i], sDollarString);
+			// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                            char buf1[128];
+                            char buf2[128];
+                            //char buf3[256];
+                            //char buf4[256];
+                            my__wchar2char( pContractStrings[i], buf1);
+                            my__wchar2char( sDollarString, buf2);
+			//swprintf(sString, lengthof(sString), L"%ls ( %ls )", pContractStrings[i], sDollarString);
+			swprintf(sString, lengthof(sString), L"%s ( %s )", buf1, buf2);
 			AddMonoString(box, sString);
 		}
 	}
@@ -5492,7 +5507,15 @@ static void CreateAssignmentsBox()
 		if (i == ASSIGN_MENU_ON_DUTY && s != NULL && s->bAssignment < ON_DUTY)
 		{
 			// show his squad # in brackets
-			swprintf(buf, lengthof(buf), L"%ls(%d)", str, s->bAssignment + 1);
+						// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                            char buf1[256];
+                            //char buf2[128];
+                            //char buf3[256];
+                            //char buf4[256];
+                            my__wchar2char( str, buf1);
+                            //my__wchar2char( sDollarString, buf2);
+			//swprintf(buf, lengthof(buf), L"%ls(%d)", str, s->bAssignment + 1);
+			swprintf(buf, lengthof(buf), L"%s(%d)", buf1, s->bAssignment + 1);
 			str = buf;
 		}
 		AddMonoString(box, str);

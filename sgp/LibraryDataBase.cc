@@ -8,6 +8,8 @@
 #include "MemMan.h"
 #include "Debug.h"
 
+#include <android/log.h>
+
 
 #define	FILENAME_SIZE 256
 
@@ -61,6 +63,8 @@ static BOOLEAN InitializeLibrary(const char* pLibraryName, LibraryHeaderStruct* 
 
 void InitializeFileDatabase(char const* LibFilenames[], UINT const LibCount)
 {
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "Filedatabase init call!");
+
 	INT16			i;
 
 	//if all the libraries exist, set them up
@@ -77,11 +81,20 @@ void InitializeFileDatabase(char const* LibFilenames[], UINT const LibCount)
 		{
 			if (!InitializeLibrary(LibFilenames[i], &libs[i]))
 			{
+				__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Initialising libraries failed");
 				FastDebugMsg(String("Warning in InitializeFileDatabase(): Library Id #%d (%s) is to be loaded but cannot be found.\n", i, LibFilenames[i]));
-				throw std::runtime_error("Initialising libraries failed");
+				// ANDROID hack: do not bail out when lib missing to enable no-music/no-sound gameplay
+
+				// comment: I do not want to support piracy here ("rips" in this case), but the music-bug
+				//          is very annoying and also some people have little space on their sdcards.
+				//          so I enabled the ability to go without the music and speech (which players
+                //          do not need anyway when always playing with zero volume)
+
+				//throw std::runtime_error("Initialising libraries failed");
 			}
 		}
 	}
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "Filedatabase init DONE");
 }
 
 
@@ -90,6 +103,7 @@ static BOOLEAN CloseLibrary(INT16 sLibraryID);
 
 void ShutDownFileDatabase()
 {
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "Filedatabase shutdown!");
 	UINT16 sLoop1;
 
 	// Free up the memory used for each library
@@ -107,6 +121,7 @@ void ShutDownFileDatabase()
 
 static int CompareFileHeader(const void* a, const void* b)
 {
+	//__android_log_print(ANDROID_LOG_INFO, "==TEST==", "LibraryDatabase comapre file header!");
 	const FileHeaderStruct* fha = (const FileHeaderStruct*)a;
 	const FileHeaderStruct* fhb = (const FileHeaderStruct*)b;
 	return strcasecmp(fha->pFileName, fhb->pFileName);
@@ -116,6 +131,7 @@ static int CompareFileHeader(const void* a, const void* b)
 // Replace all \ in a string by /
 static char* Slashify(const char* s)
 {
+	//__android_log_print(ANDROID_LOG_INFO, "==TEST==", "Filedatabase Slashify!");
 	char* const res = MALLOCN(char, strlen(s) + 1);
 	char* d = res;
 	do { *d++ = (*s == '\\' ? '/' : *s); } while (*s++ != '\0');
@@ -126,6 +142,7 @@ static char* Slashify(const char* s)
 static BOOLEAN InitializeLibrary(const char* const lib_name, LibraryHeaderStruct* const lib)
 try
 {
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "Filedatabase Initialize Library!");
 	FILE* hFile = fopen(lib_name, "rb");
 	if (hFile == NULL)
 	{
@@ -202,6 +219,7 @@ catch (...) { return 0; }
 
 
 BOOLEAN LoadDataFromLibrary(LibraryFile* const f, void* const pData, const UINT32 uiBytesToRead)
+	//__android_log_print(ANDROID_LOG_INFO, "==TEST==", "Filedatabase LoadDataFromLibrary");
 {
 	if (f->pFileHeader == NULL) return FALSE;
 
@@ -227,6 +245,7 @@ static LibraryHeaderStruct*    GetLibraryFromFileName(char const* filename);
 
 
 bool CheckIfFileExistInLibrary(char const* const filename)
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "Filedatabase CheckIFFileExistsInLibrary!");
 {
 	LibraryHeaderStruct const* const lib = GetLibraryFromFileName(filename);
 	return lib && GetFileHeaderFromLibrary(lib, filename);
@@ -240,6 +259,7 @@ static BOOLEAN IsLibraryOpened(INT16 sLibraryID);
  * the file MAY be in is open.  E.g. file is  Laptop/Test.sti, if the Laptop/
  * library is open, it returns true */
 static LibraryHeaderStruct* GetLibraryFromFileName(char const* const filename)
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "Filedatabase get LibraryFromFilename");
 {
 	// Loop through all the libraries to check which library the file is in
 	LibraryHeaderStruct* best_match = 0;
@@ -300,6 +320,7 @@ static int CompareFileNames(const void* key, const void* member)
 /* This function will see if a file is in a library.  If it is, the file will be
  * opened and a file handle will be created for it. */
 BOOLEAN OpenFileFromLibrary(const char* const pName, LibraryFile* const f)
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "Filedatabase OpenFileFromLibrary: %s", pName);
 {
 	//Check if the file can be contained from an open library ( the path to the file a library path )
 	LibraryHeaderStruct* const lib = GetLibraryFromFileName(pName);

@@ -11,6 +11,7 @@
 #include "Random.h"
 #include "LaptopSave.h"
 
+#include "Font.h"
 
 #define ATTITUDE_LIST_SIZE 20
 
@@ -400,8 +401,9 @@ static void SetMercSkinAndHairColors(void)
 
 	Assert(iPortraitNumber < lengthof(Colors));
 	MERCPROFILESTRUCT& p = GetProfile(PLAYER_GENERATED_CHARACTER_ID + LaptopSaveInfo.iVoiceId);
-	strcpy(p.HAIR, Colors[iPortraitNumber].Hair);
-	strcpy(p.SKIN, Colors[iPortraitNumber].Skin);
+	// MADE ARM SPECIFIC CHANGE HERE!
+	strcpy((char*)p.HAIR, (char*)Colors[iPortraitNumber].Hair);
+	strcpy((char*)p.SKIN, (char*)Colors[iPortraitNumber].Skin);
 }
 
 

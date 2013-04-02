@@ -1026,7 +1026,11 @@ void DrawSelectedUIAboveGuy(SOLDIERTYPE& s)
 		else if (s.bAssignment >= ON_DUTY)
 		{
 			SetFontForeground(FONT_YELLOW);
-			swprintf(buf, lengthof(buf), L"(%ls)", pAssignmentStrings[s.bAssignment]);
+			// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf4[768];
+            my__wchar2char( pAssignmentStrings[s.bAssignment], buf4);
+			swprintf(buf, lengthof(buf), L"(%s)", buf4);
+			//swprintf(buf, lengthof(buf), L"(%ls)", pAssignmentStrings[s.bAssignment]);
 			action = buf;
 		}
 		else if (s.bTeam == gbPlayerNum     &&
@@ -1357,7 +1361,11 @@ static void MakeButtonDoor(UINT idx, UINT gfx, INT16 x, INT16 y, INT16 ap, INT16
 	else
 	{
 		wchar_t zDisp[100];
-		swprintf(zDisp, lengthof(zDisp), L"%ls ( %d )", help, ap);
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+        char buf4[512];
+        my__wchar2char( help, buf4);
+		swprintf(zDisp, lengthof(zDisp), L"%s ( %d )", buf4, ap);
+		//swprintf(zDisp, lengthof(zDisp), L"%ls ( %d )", help, ap);
 		btn->SetFastHelpText(zDisp);
 	}
 	if (disable ||

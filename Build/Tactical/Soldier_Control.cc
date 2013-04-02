@@ -5030,7 +5030,8 @@ UINT8 GetPaletteRepIndexFromID(const PaletteRepID pal_rep)
 	// Check if type exists
 	for (UINT32 i = 0; i < guiNumReplacements; ++i)
 	{
-		if (strcmp(pal_rep, gpPalRep[i].ID) == 0) return i;
+		// MADE ARM SPECIFIC CHANGE HERE
+		if (strcmp((char*)pal_rep, (char*)gpPalRep[i].ID) == 0) return i;
 	}
 
 	throw std::logic_error("Invalid Palette Replacement ID given");
@@ -5956,22 +5957,23 @@ no_sub:
 	}
 
 	SGPFILENAME filename = "";
-	sprintf(filename, BATTLESNDSDIR "/%s_%s.wav", basename, battle_snd->zName);
+	// MADE ARM SPECIFIC CHANGE HERE
+	sprintf((char*)filename, BATTLESNDSDIR "/%s_%s.wav", basename, battle_snd->zName);
 
-	if (!FileExists(filename))
+	if (!FileExists((char*)filename))
 	{
 		if (battle_snd_id == BATTLE_SOUND_DIE1)
 		{
 			// The "die" sound filenames differs between profiles and languages
-			sprintf(filename, BATTLESNDSDIR "/%s_dying.wav", basename);
-			if (FileExists(filename)) goto file_exists;
+			sprintf((char*)filename, BATTLESNDSDIR "/%s_dying.wav", basename);
+			if (FileExists((char*)filename)) goto file_exists;
 		}
 
 		if (s->ubProfile == NO_PROFILE) return FALSE;
 
 		// Generic replacement voices
 		char const prefix = s->ubBodyType == REGFEMALE ? 'f' : 'm';
-		sprintf(filename, BATTLESNDSDIR "/%c_%s.wav", prefix, battle_snd->zName);
+		sprintf((char*)filename, BATTLESNDSDIR "/%c_%s.wav", prefix, battle_snd->zName);
 	}
 file_exists:;
 
@@ -5987,7 +5989,8 @@ file_exists:;
 	}
 
 	UINT32 const pan       = SoundDir(s->sGridNo);
-	UINT32 const uiSoundID = SoundPlay(filename, volume, pan, 1, NULL, NULL);
+	// MADE ARM SPECIFIC CHANGE HERE
+	UINT32 const uiSoundID = SoundPlay((char*)filename, volume, pan, 1, NULL, NULL);
 	if (uiSoundID == SOUND_ERROR) return FALSE;
 	s->uiBattleSoundID = uiSoundID;
 

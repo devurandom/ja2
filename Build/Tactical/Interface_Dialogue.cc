@@ -740,7 +740,11 @@ void RenderTalkingMenu()
 				pid                  != NO_PROFILE)
 		{
 			UINT8 const desire = CalcDesireToTalk(pid, gubSrcSoldierProfile, ubTalkMenuApproachIDs[cnt]);
-			swprintf(buf, lengthof(buf), L"%ls (%d)", zTalkMenuStrings[cnt], desire);
+			// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf4[512];
+            my__wchar2char( zTalkMenuStrings[cnt], buf4);
+			swprintf(buf, lengthof(buf), L"%s (%d)", buf4, desire);
+			//swprintf(buf, lengthof(buf), L"%ls (%d)", zTalkMenuStrings[cnt], desire);
 			str = buf;
 		}
 		else

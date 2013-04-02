@@ -7,7 +7,7 @@
 #include "VObject.h"
 #include "VObject_Blitters.h"
 #include "VSurface.h"
-
+#include <android/log.h>
 
 // ******************************************************************************
 //
@@ -40,6 +40,7 @@ SGPVObject::SGPVObject(SGPImage const* const img) :
 	next_(gpVObjectHead)
 {
 	if (!(img->fFlags & IMAGE_TRLECOMPRESSED))
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Image for video object creation must be TRLE compressed");
 	{
 		throw std::runtime_error("Image for video object creation must be TRLE compressed");
 	}

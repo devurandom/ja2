@@ -152,7 +152,13 @@ void RenderMercsAccount()
 	BltVideoObject(FRAME_BUFFER, guiAccountNumberGrid, 0, MERC_AC_ACCOUNT_NUMBER_X, MERC_AC_ACCOUNT_NUMBER_Y);
 
 	//Display Players account number
-	swprintf(sText, lengthof(sText), L"%ls %05d", MercAccountText[MERC_ACCOUNT_ACCOUNT], LaptopSaveInfo.guiPlayersMercAccountNumber);
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[512];
+                    //char buf2[512];
+                    my__wchar2char(MercAccountText[MERC_ACCOUNT_ACCOUNT], buf1);
+                    //my__wchar2char(pWebPagesTitles[iIndex], buf2);
+	swprintf(sText, lengthof(sText), L"%s %05d", buf1, LaptopSaveInfo.guiPlayersMercAccountNumber);
+	//swprintf(sText, lengthof(sText), L"%ls %05d", buf1, LaptopSaveInfo.guiPlayersMercAccountNumber);
 	DrawTextToScreen(sText, MERC_AC_ACCOUNT_NUMBER_TEXT_X, MERC_AC_ACCOUNT_NUMBER_TEXT_Y, 0, MERC_ACCOUNT_TEXT_FONT, MERC_ACCOUNT_TEXT_COLOR, FONT_MCOLOR_BLACK, LEFT_JUSTIFIED);
 
 	//Display the order grid titles

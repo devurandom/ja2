@@ -1674,7 +1674,9 @@ static void RenderStaticWorld(void);
 // For coordinate transformations
 void RenderWorld(void)
 {
-	gfRenderFullThisFrame = FALSE;
+	// android modification: render always full frame
+	gfRenderFullThisFrame = TRUE;
+	//gfRenderFullThisFrame = FALSE;
 
 	// If we are testing renderer, set background to pink!
 	if (gTacticalStatus.uiFlags & DEBUGCLIFFS)
@@ -2205,6 +2207,9 @@ void ScrollWorld(void)
 		g_scroll_inertia = false;
 		gfScrollPending  = FALSE;
 	}
+	// android modification: always redraw whole screen!
+	// no longer needed because of 'jaa''s patch :)
+	//SetRenderFlags(RENDER_FLAG_FULL | RENDER_FLAG_CHECKZ);
 }
 
 

@@ -39,6 +39,8 @@
 #include "ScreenIDs.h"
 #include "FileMan.h"
 
+#include "Font.h"
+
 
 INT8 gubVehicleMovementGroups[ MAX_VEHICLES ];
 

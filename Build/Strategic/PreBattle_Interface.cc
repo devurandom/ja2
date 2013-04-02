@@ -943,7 +943,14 @@ void RenderPreBattleInterface()
 		SetFontAttributes(FONT10ARIAL, FONT_YELLOW);
 		wchar_t sector_name[128];
 		GetSectorIDString(sec_x, sec_y, sec_z, sector_name, lengthof(sector_name), TRUE);
-		mprintf(70, 17, L"%ls %ls", gpStrategicString[STR_PB_SECTOR], sector_name);
+
+            // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[128];
+            char buf2[128];
+            my__wchar2char( gpStrategicString[STR_PB_SECTOR] , buf1);
+            my__wchar2char(sector_name , buf2);
+		mprintf(70, 17, L"%s %s",buf1, buf2);
+		//mprintf(70, 17, L"%ls %ls", gpStrategicString[STR_PB_SECTOR], sector_name);
 
 		SetFont(FONT14ARIAL);
 		// Enemy

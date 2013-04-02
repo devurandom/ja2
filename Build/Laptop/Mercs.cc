@@ -30,6 +30,7 @@
 #include "Debug.h"
 #include "Font_Control.h"
 
+#include "Font.h"
 
 #define		MERC_TEXT_FONT									FONT12ARIAL
 #define		MERC_TEXT_COLOR									FONT_MCOLOR_WHITE
@@ -1196,7 +1197,13 @@ void DisplayTextForSpeckVideoPopUp(const wchar_t* const pString)
 		return;
 
 	//add the "" around the speech.
-	swprintf( gsSpeckDialogueTextPopUp, lengthof(gsSpeckDialogueTextPopUp), L"\"%ls\"", pString );
+	// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[512];
+                    //char buf2[512];
+                    my__wchar2char(pString, buf1);
+                    //my__wchar2char(pWebPagesTitles[iIndex], buf2);
+	swprintf( gsSpeckDialogueTextPopUp, lengthof(gsSpeckDialogueTextPopUp), L"\"%s\"", buf1 );
+	//swprintf( gsSpeckDialogueTextPopUp, lengthof(gsSpeckDialogueTextPopUp), L"\"%ls\"", pString );
 
 	gfDisplaySpeckTextBox = TRUE;
 

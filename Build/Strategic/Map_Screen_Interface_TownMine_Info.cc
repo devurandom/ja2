@@ -28,6 +28,7 @@
 #include "VObject.h"
 #include "VSurface.h"
 
+#include "Font.h"
 
 #define BOX_BUTTON_HEIGHT 20
 
@@ -203,13 +204,22 @@ static void AddTextToTownBox(PopUpBox* const box)
 	AddSectorToBox(box);
 
 	// town size
-	swprintf( wString, lengthof(wString), L"%ls:", pwTownInfoStrings[ 0 ] );
+	// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[256];
+                    my__wchar2char( pwTownInfoStrings[ 0 ], buf1);
+
+	swprintf( wString, lengthof(wString), L"%s:", buf1 );
+	//swprintf( wString, lengthof(wString), L"%ls:", pwTownInfoStrings[ 0 ] );
 	AddMonoString(box, wString);
 	swprintf( wString, lengthof(wString), L"%d",  GetTownSectorSize( ubTownId ) );
 	AddSecondColumnMonoString(box, wString);
 
 	// main facilities
-	swprintf(wString, lengthof(wString), L"%ls:", pwTownInfoStrings[4]);
+	// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1a[256];
+                    my__wchar2char( pwTownInfoStrings[ 4 ], buf1a);
+	swprintf(wString, lengthof(wString), L"%s:", buf1a);
+	//swprintf(wString, lengthof(wString), L"%ls:", pwTownInfoStrings[4]);
 	AddMonoString(box, wString);
 	GetSectorFacilitiesFlags( bCurrentTownMineSectorX, bCurrentTownMineSectorY, wString, lengthof(wString));
 	AddSecondColumnMonoString(box, wString);
@@ -218,7 +228,11 @@ static void AddTextToTownBox(PopUpBox* const box)
 	if ( MilitiaTrainingAllowedInSector( bCurrentTownMineSectorX, bCurrentTownMineSectorY, 0 ) )
 	{
 		// town control
-		swprintf(wString, lengthof(wString), L"%ls:", pwTownInfoStrings[1]);
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1b[256];
+                    my__wchar2char( pwTownInfoStrings[ 1 ], buf1b);
+		swprintf(wString, lengthof(wString), L"%s:", buf1b);
+		//swprintf(wString, lengthof(wString), L"%ls:", pwTownInfoStrings[1]);
 		AddMonoString(box, wString);
 		swprintf(wString, lengthof(wString), L"%d%%", GetTownSectorsUnderControl(ubTownId) * 100 / GetTownSectorSize(ubTownId));
 		AddSecondColumnMonoString(box, wString);
@@ -228,7 +242,11 @@ static void AddTextToTownBox(PopUpBox* const box)
 	if( gTownLoyalty[ ubTownId ].fStarted && gfTownUsesLoyalty[ ubTownId ])
 	{
 		// town loyalty
-		swprintf(wString, lengthof(wString), L"%ls:", pwTownInfoStrings[3]);
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1c[256];
+                    my__wchar2char( pwTownInfoStrings[ 3 ], buf1c);
+		swprintf(wString, lengthof(wString), L"%s:", buf1c);
+		//swprintf(wString, lengthof(wString), L"%ls:", pwTownInfoStrings[3]);
 		AddMonoString(box, wString);
 		swprintf(wString, lengthof(wString), L"%d%%", gTownLoyalty[ubTownId].ubRating);
 		AddSecondColumnMonoString(box, wString);
@@ -239,7 +257,11 @@ static void AddTextToTownBox(PopUpBox* const box)
 	if( sMineSector != -1 )
 	{
 		// Associated Mine: Sector
-	  swprintf(wString, lengthof(wString), L"%ls:",  pwTownInfoStrings[2]);
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1d[256];
+                    my__wchar2char( pwTownInfoStrings[ 2 ], buf1d);
+	  swprintf(wString, lengthof(wString), L"%s:",  buf1d);
+	  //swprintf(wString, lengthof(wString), L"%ls:",  pwTownInfoStrings[2]);
 		AddMonoString(box, wString);
 	  GetShortSectorString( ( INT16 )( sMineSector % MAP_WORLD_X ), ( INT16 )( sMineSector / MAP_WORLD_X ), wString, lengthof(wString));
 		AddSecondColumnMonoString(box, wString);
@@ -255,7 +277,13 @@ static void AddTextToMineBox(PopUpBox* const box, INT8 const mine)
 	wchar_t                 buf[64];
 
 	// Name of town followed by "mine"
-	swprintf(buf, lengthof(buf), L"%ls %ls", pTownNames[town], pwMineStrings[0]);
+	// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[256];
+                    char buf2[256];
+                    my__wchar2char( pTownNames[town], buf1);
+                    my__wchar2char( pwMineStrings[0], buf2);
+	swprintf(buf, lengthof(buf), L"%s %s", buf1, buf2);
+	//swprintf(buf, lengthof(buf), L"%ls %ls", pTownNames[town], pwMineStrings[0]);
 	AddMonoString(box, buf);
 
 	AddMonoString(box, L""); // Blank line
@@ -263,7 +291,12 @@ static void AddTextToMineBox(PopUpBox* const box, INT8 const mine)
 	AddSectorToBox(box);
 
 	// Mine status
-	swprintf(buf, lengthof(buf), L"%ls:", pwMineStrings[9]);
+	// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+	char buf1e[256];
+    my__wchar2char( pwMineStrings[9], buf1e);
+
+	swprintf(buf, lengthof(buf), L"%s:", buf1e);
+	//swprintf(buf, lengthof(buf), L"%ls:", pwMineStrings[9]);
 	AddMonoString(box, buf);
 	wchar_t const* const status_txt =
 		status.fEmpty      ? pwMineStrings[5] : // Abandonded
@@ -275,14 +308,22 @@ static void AddTextToMineBox(PopUpBox* const box, INT8 const mine)
 	if (!status.fEmpty)
 	{
 		// Current production
-		swprintf(buf, lengthof(buf), L"%ls:", pwMineStrings[3]);
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+        char buf1f[256];
+        my__wchar2char( pwMineStrings[3], buf1f);
+		swprintf(buf, lengthof(buf), L"%s:", buf1f);
+		//swprintf(buf, lengthof(buf), L"%ls:", pwMineStrings[3]);
 		AddMonoString(box, buf);
 		UINT32 const predicted_income = PredictDailyIncomeFromAMine(mine);
 		SPrintMoney(buf, predicted_income);
 		AddSecondColumnMonoString(box, buf);
 
 		// Potential production
-		swprintf(buf, lengthof(buf), L"%ls:", pwMineStrings[4]);
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+        char buf1g[256];
+        my__wchar2char( pwMineStrings[41], buf1g);
+		swprintf(buf, lengthof(buf), L"%s:",buf1g);
+		//swprintf(buf, lengthof(buf), L"%ls:", pwMineStrings[4]);
 		AddMonoString(box, buf);
 		UINT32 const max_removal = GetMaxDailyRemovalFromMine(mine);
 		SPrintMoney(buf, max_removal);
@@ -290,14 +331,22 @@ static void AddTextToMineBox(PopUpBox* const box, INT8 const mine)
 
 		if (GetMaxPeriodicRemovalFromMine(mine) > 0)
 		{ // Production rate (current production as a percentage of potential production)
-			swprintf(buf, lengthof(buf), L"%ls:", pwMineStrings[10]);
+		    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1h[256];
+            my__wchar2char( pwMineStrings[10], buf1h);
+			swprintf(buf, lengthof(buf), L"%s:", buf1h);
+			//swprintf(buf, lengthof(buf), L"%ls:", pwMineStrings[10]);
 			AddMonoString(box, buf);
 			swprintf(buf, lengthof(buf), L"%d%%", predicted_income * 100 / max_removal);
 			AddSecondColumnMonoString(box, buf);
 		}
 
 		// Town control percentage
-		swprintf(buf, lengthof(buf), L"%ls:", pwMineStrings[12]);
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1i[256];
+            my__wchar2char( pwMineStrings[12], buf1i);
+		swprintf(buf, lengthof(buf), L"%s:", buf1i);
+		//swprintf(buf, lengthof(buf), L"%ls:", pwMineStrings[12]);
 		AddMonoString(box, buf);
 		swprintf(buf, lengthof(buf), L"%d%%", GetTownSectorsUnderControl(town) * 100 / GetTownSectorSize(town));
 		AddSecondColumnMonoString(box, buf);
@@ -305,14 +354,22 @@ static void AddTextToMineBox(PopUpBox* const box, INT8 const mine)
 		TOWN_LOYALTY const& loyalty = gTownLoyalty[town];
 		if (loyalty.fStarted && gfTownUsesLoyalty[town])
 		{ // Town loyalty percentage
-			swprintf(buf, lengthof(buf), L"%ls:", pwMineStrings[13]);
+		    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1j[256];
+            my__wchar2char( pwMineStrings[13], buf1j);
+			swprintf(buf, lengthof(buf), L"%s:", buf1j);
+			//swprintf(buf, lengthof(buf), L"%ls:", pwMineStrings[13]);
 			AddMonoString(box, buf);
 			swprintf(buf, lengthof(buf), L"%d%%", loyalty.ubRating);
 			AddSecondColumnMonoString(box, buf);
 		}
 
 		// Ore type (silver/gold)
-		swprintf(buf, lengthof(buf), L"%ls:", pwMineStrings[11]);
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1k[256];
+            my__wchar2char( pwMineStrings[11], buf1k);
+		swprintf(buf, lengthof(buf), L"%s:", buf1k);
+		//swprintf(buf, lengthof(buf), L"%ls:", pwMineStrings[11]);
 		AddMonoString(box, buf);
 		AddSecondColumnMonoString(box, status.ubMineType == SILVER_MINE ? pwMineStrings[1] : pwMineStrings[2]);
 	}
@@ -361,7 +418,11 @@ static void AddSectorToBox(PopUpBox* const box)
 	CHAR16 wString2[ 10 ];
 
 	// sector
-	swprintf( wString, lengthof(wString), L"%ls:", pwMiscSectorStrings[ 1 ]);
+	// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[256];
+            my__wchar2char( pwMiscSectorStrings[ 1 ], buf1);
+	swprintf( wString, lengthof(wString), L"%s:", buf1);
+	//swprintf( wString, lengthof(wString), L"%ls:", pwMiscSectorStrings[ 1 ]);
 	AddMonoString(box, wString);
 
 	GetShortSectorString( bCurrentTownMineSectorX, bCurrentTownMineSectorY, wString, lengthof(wString));
@@ -407,14 +468,22 @@ static void AddCommonInfoToBox(PopUpBox* const box)
 	if ( MilitiaTrainingAllowedInSector( bCurrentTownMineSectorX, bCurrentTownMineSectorY, 0 ) && !fUnknownSAMSite )
 	{
 		// controlled:
-		swprintf( wString, lengthof(wString), L"%ls:", pwMiscSectorStrings[ 4 ] );
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[256];
+            my__wchar2char( pwMiscSectorStrings[ 4 ] , buf1);
+		swprintf( wString, lengthof(wString), L"%s:", buf1);
+		//swprintf( wString, lengthof(wString), L"%ls:", pwMiscSectorStrings[ 4 ] );
 		AddMonoString(box, wString);
 
 		// No/Yes
 		AddSecondColumnMonoString(box, pwMiscSectorStrings[StrategicMap[CALCULATE_STRATEGIC_INDEX(bCurrentTownMineSectorX, bCurrentTownMineSectorY)].fEnemyControlled ? 6 : 5]);
 
 		// militia - is there any?
-		swprintf(wString, lengthof(wString), L"%ls:", pwTownInfoStrings[6]);
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1l[256];
+            my__wchar2char( pwTownInfoStrings[6] , buf1l);
+		swprintf(wString, lengthof(wString), L"%s:", buf1l);
+		//swprintf(wString, lengthof(wString), L"%ls:", pwTownInfoStrings[6]);
 		AddMonoString(box, wString);
 
 		ubMilitiaTotal = CountAllMilitiaInSector(bCurrentTownMineSectorX, bCurrentTownMineSectorY);
@@ -435,7 +504,11 @@ static void AddCommonInfoToBox(PopUpBox* const box)
 
 
 		// percentage of current militia squad training completed
-		swprintf(wString, lengthof(wString), L"%ls:", pwTownInfoStrings[5]);
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1m[256];
+            my__wchar2char( pwTownInfoStrings[5] , buf1m);
+		swprintf(wString, lengthof(wString), L"%s:", buf1m);
+		//swprintf(wString, lengthof(wString), L"%ls:", pwTownInfoStrings[5]);
 		AddMonoString(box, wString);
 		swprintf(wString, lengthof(wString), L"%d%%", SectorInfo[SECTOR(bCurrentTownMineSectorX, bCurrentTownMineSectorY)].ubMilitiaTrainingPercentDone);
 		AddSecondColumnMonoString(box, wString);
@@ -443,7 +516,11 @@ static void AddCommonInfoToBox(PopUpBox* const box)
 
 
 	// enemy forces
-	swprintf( wString, lengthof(wString), L"%ls:", pwMiscSectorStrings[ 0 ] );
+	// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[256];
+            my__wchar2char( pwMiscSectorStrings[ 0 ] , buf1);
+	swprintf( wString, lengthof(wString), L"%s:", buf1 );
+	//swprintf( wString, lengthof(wString), L"%ls:", pwMiscSectorStrings[ 0 ] );
 	AddMonoString(box, wString);
 
 	// how many are there, really?
@@ -486,7 +563,11 @@ static void AddItemsInSectorToBox(PopUpBox* const box)
 
 	// items in sector (this works even for underground)
 
-	swprintf( wString, lengthof(wString), L"%ls:", pwMiscSectorStrings[ 2 ] );
+// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[256];
+            my__wchar2char( pwMiscSectorStrings[ 2 ] , buf1);
+	swprintf( wString, lengthof(wString), L"%s:",buf1 );
+	//swprintf( wString, lengthof(wString), L"%ls:", pwMiscSectorStrings[ 2 ] );
 	AddMonoString(box, wString);
 
 	swprintf( wString, lengthof(wString), L"%d", GetNumberOfVisibleWorldItemsFromSectorStructureForSector( bCurrentTownMineSectorX, bCurrentTownMineSectorY, bCurrentTownMineSectorZ ));

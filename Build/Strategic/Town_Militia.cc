@@ -26,6 +26,7 @@
 #include "Debug.h"
 #include "ScreenIDs.h"
 
+#include "Font.h"
 
 #define SIZE_OF_MILITIA_COMPLETED_TRAINING_LIST 50
 
@@ -441,7 +442,13 @@ void HandleInterfaceMessageForCostOfTrainingMilitia( SOLDIERTYPE *pSoldier )
 	}
 	else
 	{
-		swprintf( sString, lengthof(sString), L"%ls%d. %ls", pMilitiaConfirmStrings[ 0 ], giTotalCostOfTraining, pMilitiaConfirmStrings[ 1 ] );
+	    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[512];
+            char buf2[512];
+            my__wchar2char(pMilitiaConfirmStrings[ 0 ] , buf1);
+            my__wchar2char(pMilitiaConfirmStrings[ 1 ] , buf2);
+		swprintf( sString, lengthof(sString), L"%s%d. %s", buf1, giTotalCostOfTraining, buf2 );
+		//swprintf( sString, lengthof(sString), L"%ls%d. %ls", pMilitiaConfirmStrings[ 0 ], giTotalCostOfTraining, pMilitiaConfirmStrings[ 1 ] );
 	}
 
 	// if we are in mapscreen, make a pop up

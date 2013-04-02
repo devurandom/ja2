@@ -12,6 +12,7 @@
 #include "LibraryDataBase.h"
 #include "MemMan.h"
 #include "PODObj.h"
+#include <string>
 
 #ifdef _WIN32
 #	include <shlobj.h>
@@ -25,6 +26,903 @@
 #		include <sys/param.h>
 #	endif
 #endif
+
+//#include <sys/stat.h>
+//#include <sys/types.h>
+#include <dirent.h>
+#include <ctype.h>
+//#include <errno.h>
+//#include <pwd.h>
+//#include <stdlib.h>
+#include <string.h>
+//#include <unistd.h>
+
+//struct stat;
+
+#include <android/log.h>
+
+
+/* Free allocated data belonging to a my_my_glob_t structure. */
+void
+my_globfree(my_glob_t *pmy_glob)
+{
+	int i;
+	char **pp;
+
+	if (pmy_glob->gl_pathv != NULL) {
+		pp = pmy_glob->gl_pathv + pmy_glob->gl_offs;
+		for (i = pmy_glob->gl_pathc; i--; ++pp)
+			if (*pp)
+				free(*pp);
+		free(pmy_glob->gl_pathv);
+		pmy_glob->gl_pathv = NULL;
+	}
+	if (pmy_glob->gl_statv != NULL) {
+		for (i = 0; i < pmy_glob->gl_pathc; i++) {
+			if (pmy_glob->gl_statv[i] != NULL)
+				free(pmy_glob->gl_statv[i]);
+		}
+		free(pmy_glob->gl_statv);
+		pmy_glob->gl_statv = NULL;
+	}
+}
+
+struct my_glob_lim {
+	size_t	glim_malloc;
+	size_t	glim_stat;
+	size_t	glim_readdir;
+};
+typedef u_short Char;
+static Char	*g_strchr(const Char *, int);
+
+#define	CHAR(c)		((Char)((c)&M_ASCII))
+#define	META(c)		((Char)((c)|M_QUOTE))
+#define	M_ALL		META('*')
+#define	M_END		META(']')
+#define	M_NOT		META('!')
+#define	M_ONE		META('?')
+#define	M_RNG		META('-')
+#define	M_SET		META('[')
+#define	M_CLASS		META(':')
+#define	ismeta(c)	(((c)&M_QUOTE) != 0)
+
+#define	MYGLOB_LIMIT_MALLOC	65536
+#define	MYGLOB_LIMIT_STAT		128
+#define	MYGLOB_LIMIT_READDIR	16384
+
+static struct cclass {
+	const char *name;
+	int (*isctype)(int);
+} cclasses[] = {
+	{ "alnum",	isalnum },
+	{ "alpha",	isalpha },
+	{ "blank",	isblank },
+	{ "cntrl",	iscntrl },
+	{ "digit",	isdigit },
+	{ "graph",	isgraph },
+	{ "lower",	islower },
+	{ "print",	isprint },
+	{ "punct",	ispunct },
+	{ "space",	isspace },
+	{ "upper",	isupper },
+	{ "xdigit",	isxdigit },
+	{ NULL,		NULL }
+};
+
+#define NCCLASSES	(sizeof(cclasses) / sizeof(cclasses[0]) - 1)
+
+static int
+g_Ctoc(const Char *str, char *buf, u_int len);
+static int	 my_glob2(Char *, Char *, Char *, Char *, Char *, Char *,
+		    my_glob_t *, struct my_glob_lim *);
+static int	 my_glob0(const Char *, my_glob_t *, struct my_glob_lim *);
+static int	 my_globexp1(const Char *, my_glob_t *, struct my_glob_lim *);
+		    
+
+static Char *
+g_strchr(const Char *str, int ch)
+{
+	do {
+		if (*str == ch)
+			return ((Char *)str);
+	} while (*str++);
+	return (NULL);
+}
+
+/*
+ * Recursive brace my_globbing helper. Tries to expand a single brace.
+ * If it succeeds then it invokes my_globexp1 with the new pattern.
+ * If it fails then it tries to my_glob the rest of the pattern and returns.
+ */
+static int
+my_globexp2(const Char *ptr, const Char *pattern, my_glob_t *pmy_glob,
+    struct my_glob_lim *limitp)
+{
+	int     i, rv;
+	Char   *lm, *ls;
+	const Char *pe, *pm, *pl;
+	Char    patbuf[MAXPATHLEN];
+
+	/* copy part up to the brace */
+	for (lm = patbuf, pm = pattern; pm != ptr; *lm++ = *pm++)
+		;
+	*lm = EOS;
+	ls = lm;
+
+	/* Find the balanced brace */
+	for (i = 0, pe = ++ptr; *pe; pe++)
+		if (*pe == LBRACKET) {
+			/* Ignore everything between [] */
+			for (pm = pe++; *pe != RBRACKET && *pe != EOS; pe++)
+				;
+			if (*pe == EOS) {
+				/*
+				 * We could not find a matching RBRACKET.
+				 * Ignore and just look for RBRACE
+				 */
+				pe = pm;
+			}
+		} else if (*pe == LBRACE)
+			i++;
+		else if (*pe == RBRACE) {
+			if (i == 0)
+				break;
+			i--;
+		}
+
+	/* Non matching braces; just my_glob the pattern */
+	if (i != 0 || *pe == EOS)
+		return my_glob0(patbuf, pmy_glob, limitp);
+
+	for (i = 0, pl = pm = ptr; pm <= pe; pm++) {
+		switch (*pm) {
+		case LBRACKET:
+			/* Ignore everything between [] */
+			for (pl = pm++; *pm != RBRACKET && *pm != EOS; pm++)
+				;
+			if (*pm == EOS) {
+				/*
+				 * We could not find a matching RBRACKET.
+				 * Ignore and just look for RBRACE
+				 */
+				pm = pl;
+			}
+			break;
+
+		case LBRACE:
+			i++;
+			break;
+
+		case RBRACE:
+			if (i) {
+				i--;
+				break;
+			}
+			/* FALLTHROUGH */
+		case COMMA:
+			if (i && *pm == COMMA)
+				break;
+			else {
+				/* Append the current string */
+				for (lm = ls; (pl < pm); *lm++ = *pl++)
+					;
+
+				/*
+				 * Append the rest of the pattern after the
+				 * closing brace
+				 */
+				for (pl = pe + 1; (*lm++ = *pl++) != EOS; )
+					;
+
+				/* Expand the current pattern */
+#ifdef DEBUG
+				qprintf("my_globexp2:", patbuf);
+#endif
+				rv = my_globexp1(patbuf, pmy_glob, limitp);
+				if (rv && rv != MYGLOB_NOMATCH)
+					return rv;
+
+				/* move after the comma, to the next string */
+				pl = pm + 1;
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+	return 0;
+}
+
+static int
+compare(const void *p, const void *q)
+{
+	return(strcmp(*(char **)p, *(char **)q));
+}
+
+
+/*
+ * pattern matching function for filenames.  Each occurrence of the *
+ * pattern causes a recursion level.
+ */
+static int
+match(Char *name, Char *pat, Char *patend)
+{
+	int ok, negate_range;
+	Char c, k;
+
+	while (pat < patend) {
+		c = *pat++;
+		switch (c & M_MASK) {
+		case M_ALL:
+			if (pat == patend)
+				return(1);
+			do {
+			    if (match(name, pat, patend))
+				    return(1);
+			} while (*name++ != EOS);
+			return(0);
+		case M_ONE:
+			if (*name++ == EOS)
+				return(0);
+			break;
+		case M_SET:
+			ok = 0;
+			if ((k = *name++) == EOS)
+				return(0);
+			if ((negate_range = ((*pat & M_MASK) == M_NOT)) != EOS)
+				++pat;
+			while (((c = *pat++) & M_MASK) != M_END) {
+				if ((c & M_MASK) == M_CLASS) {
+					Char idx = *pat & M_MASK;
+					if (idx < NCCLASSES &&
+					    cclasses[idx].isctype(k))
+						ok = 1;
+					++pat;
+				}
+				if ((*pat & M_MASK) == M_RNG) {
+					if (c <= k && k <= pat[1])
+						ok = 1;
+					pat += 2;
+				} else if (c == k)
+					ok = 1;
+			}
+			if (ok == negate_range)
+				return(0);
+			break;
+		default:
+			if (*name++ != c)
+				return(0);
+			break;
+		}
+	}
+	return(*name == EOS);
+}
+
+static DIR *
+g_opendir(Char *str, my_glob_t *pmy_glob)
+{
+	char buf[MAXPATHLEN];
+
+	if (!*str)
+		strlcpy(buf, ".", sizeof buf);
+	else {
+		if (g_Ctoc(str, buf, sizeof(buf)))
+			return(NULL);
+	}
+
+//	if (pmy_glob->gl_flags & MYGLOB_ALTDIRFUNC)
+//		return((*pmy_glob->gl_opendir)(buf));
+
+	return(opendir(buf));
+}
+
+static int
+my_glob3(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last,
+    Char *pattern, Char *restpattern, Char *restpattern_last, my_glob_t *pmy_glob,
+    struct my_glob_lim *limitp)
+{
+	struct dirent *dp;
+	DIR *dirp;
+	int err;
+	char buf[MAXPATHLEN];
+
+	/*
+	 * The readdirfunc declaration can't be prototyped, because it is
+	 * assigned, below, to two functions which are prototyped in my_glob.h
+	 * and dirent.h as taking pointers to differently typed opaque
+	 * structures.
+	 */
+	struct dirent *(*readdirfunc)(void *);
+
+	if (pathend > pathend_last)
+		return (1);
+	*pathend = EOS;
+	errno = 0;
+
+	if ((dirp = g_opendir(pathbuf, pmy_glob)) == NULL) {
+		/* TODO: don't call for ENOENT or ENOTDIR? */
+		if (pmy_glob->gl_errfunc) {
+			if (g_Ctoc(pathbuf, buf, sizeof(buf)))
+				return(MYGLOB_ABORTED);
+			if (pmy_glob->gl_errfunc(buf, errno) ||
+			    pmy_glob->gl_flags & MYGLOB_ERR)
+				return(MYGLOB_ABORTED);
+		}
+		return(0);
+	}
+
+	err = 0;
+
+	/* Search directory for matching names. */
+	if (pmy_glob->gl_flags & MYGLOB_ALTDIRFUNC)
+		readdirfunc = pmy_glob->gl_readdir;
+	else
+		readdirfunc = (struct dirent *(*)(void *))readdir;
+	while ((dp = (*readdirfunc)(dirp))) {
+		u_char *sc;
+		Char *dc;
+
+		if ((pmy_glob->gl_flags & MYGLOB_LIMIT) &&
+		    limitp->glim_readdir++ >= MYGLOB_LIMIT_READDIR) {
+			errno = 0;
+			*pathend++ = SEP;
+			*pathend = EOS;
+			return(MYGLOB_NOSPACE);
+		}
+
+		/* Initial DOT must be matched literally. */
+		if (dp->d_name[0] == DOT && *pattern != DOT)
+			continue;
+		dc = pathend;
+		sc = (u_char *) dp->d_name;
+		while (dc < pathend_last && (*dc++ = *sc++) != EOS)
+			;
+		if (dc >= pathend_last) {
+			*dc = EOS;
+			err = 1;
+			break;
+		}
+
+		if (!match(pathend, pattern, restpattern)) {
+			*pathend = EOS;
+			continue;
+		}
+		err = my_glob2(pathbuf, pathbuf_last, --dc, pathend_last,
+		    restpattern, restpattern_last, pmy_glob, limitp);
+		if (err)
+			break;
+	}
+
+	if (pmy_glob->gl_flags & MYGLOB_ALTDIRFUNC)
+		(*pmy_glob->gl_closedir)(dirp);
+	else
+		closedir(dirp);
+	return(err);
+}
+
+/*
+ * Extend the gl_pathv member of a my_glob_t structure to accommodate a new item,
+ * add the new item, and update gl_pathc.
+ *
+ * This assumes the BSD realloc, which only copies the block when its size
+ * crosses a power-of-two boundary; for v7 realloc, this would cause quadratic
+ * behavior.
+ *
+ * Return 0 if new item added, error code if memory couldn't be allocated.
+ *
+ * Invariant of the my_glob_t structure:
+ *	Either gl_pathc is zero and gl_pathv is NULL; or gl_pathc > 0 and
+ *	gl_pathv points to (gl_offs + gl_pathc + 1) items.
+ */
+static int
+my_globextend(const Char *path, my_glob_t *pmy_glob, struct my_glob_lim *limitp,
+    struct stat *sb)
+{
+	char **pathv;
+	ssize_t i;
+	size_t newn, len;
+	char *copy = NULL;
+	const Char *p;
+	struct stat **statv;
+
+	newn = 2 + pmy_glob->gl_pathc + pmy_glob->gl_offs;
+	if (pmy_glob->gl_offs >= INT_MAX ||
+	    pmy_glob->gl_pathc >= INT_MAX ||
+	    newn >= INT_MAX ||
+	    SIZE_MAX / sizeof(*pathv) <= newn ||
+	    SIZE_MAX / sizeof(*statv) <= newn) {
+ nospace:
+		for (i = pmy_glob->gl_offs; i < (ssize_t)(newn - 2); i++) {
+			if (pmy_glob->gl_pathv && pmy_glob->gl_pathv[i])
+				free(pmy_glob->gl_pathv[i]);
+			if ((pmy_glob->gl_flags & MYGLOB_KEEPSTAT) != 0 &&
+			    pmy_glob->gl_pathv && pmy_glob->gl_pathv[i])
+				free(pmy_glob->gl_statv[i]);
+		}
+		if (pmy_glob->gl_pathv) {
+			free(pmy_glob->gl_pathv);
+			pmy_glob->gl_pathv = NULL;
+		}
+		if (pmy_glob->gl_statv) {
+			free(pmy_glob->gl_statv);
+			pmy_glob->gl_statv = NULL;
+		}
+		return(MYGLOB_NOSPACE);
+	}
+
+	pathv = NULL;//realloc((char**) pmy_glob->gl_pathv, newn * sizeof(*pathv));
+	if (pathv == NULL)
+		goto nospace;
+	if (pmy_glob->gl_pathv == NULL && pmy_glob->gl_offs > 0) {
+		/* first time around -- clear initial gl_offs items */
+		pathv += pmy_glob->gl_offs;
+		for (i = pmy_glob->gl_offs; --i >= 0; )
+			*--pathv = NULL;
+	}
+	pmy_glob->gl_pathv = pathv;
+
+	if ((pmy_glob->gl_flags & MYGLOB_KEEPSTAT) != 0) {
+		statv = NULL;//realloc(pmy_glob->gl_statv, newn * sizeof(*statv));
+		if (statv == NULL)
+			goto nospace;
+		if (pmy_glob->gl_statv == NULL && pmy_glob->gl_offs > 0) {
+			/* first time around -- clear initial gl_offs items */
+			statv += pmy_glob->gl_offs;
+			for (i = pmy_glob->gl_offs; --i >= 0; )
+				*--statv = NULL;
+		}
+		pmy_glob->gl_statv = statv;
+		if (sb == NULL)
+			statv[pmy_glob->gl_offs + pmy_glob->gl_pathc] = NULL;
+		else {
+			limitp->glim_malloc += sizeof(**statv);
+			if ((pmy_glob->gl_flags & MYGLOB_LIMIT) &&
+			    limitp->glim_malloc >= MYGLOB_LIMIT_MALLOC) {
+				errno = 0;
+				return(MYGLOB_NOSPACE);
+			}
+			//if ((statv[pmy_glob->gl_offs + pmy_glob->gl_pathc] =
+			    malloc(sizeof(**statv));//) == NULL)
+				//goto copy_error;
+			memcpy(statv[pmy_glob->gl_offs + pmy_glob->gl_pathc], sb,
+			    sizeof(*sb));
+		}
+		statv[pmy_glob->gl_offs + pmy_glob->gl_pathc + 1] = NULL;
+	}
+
+	for (p = path; *p++;)
+		;
+	len = (size_t)(p - path);
+	limitp->glim_malloc += len;
+	if (1) {
+		malloc(len);
+		if (g_Ctoc(path, copy, len)) {
+			free(copy);
+			return(MYGLOB_NOSPACE);
+		}
+		pathv[pmy_glob->gl_offs + pmy_glob->gl_pathc++] = copy;
+	}
+	pathv[pmy_glob->gl_offs + pmy_glob->gl_pathc] = NULL;
+
+	if ((pmy_glob->gl_flags & MYGLOB_LIMIT) &&
+	    (newn * sizeof(*pathv)) + limitp->glim_malloc >
+	    MYGLOB_LIMIT_MALLOC) {
+		errno = 0;
+		return(MYGLOB_NOSPACE);
+	}
+ 
+	return(copy == NULL ? MYGLOB_NOSPACE : 0);
+}
+
+static int
+g_Ctoc(const Char *str, char *buf, u_int len)
+{
+
+	while (len--) {
+		if ((*buf++ = *str++) == EOS)
+			return (0);
+	}
+	return (1);
+}
+
+static int
+g_lstat(Char *fn, struct stat *sb, my_glob_t *pmy_glob)
+{
+	char buf[MAXPATHLEN];
+
+	if (g_Ctoc(fn, buf, sizeof(buf)))
+		return(-1);
+	if (pmy_glob->gl_flags & MYGLOB_ALTDIRFUNC)
+		return((*pmy_glob->gl_lstat)(buf, sb));
+	return(lstat(buf, sb));
+}
+
+static int
+g_stat(Char *fn, struct stat *sb, my_glob_t *pmy_glob)
+{
+	char buf[MAXPATHLEN];
+
+	if (g_Ctoc(fn, buf, sizeof(buf)))
+		return(-1);
+	if (pmy_glob->gl_flags & MYGLOB_ALTDIRFUNC)
+		return((*pmy_glob->gl_stat)(buf, sb));
+	return(stat(buf, sb));
+}
+
+/*
+ * The functions my_glob2 and my_glob3 are mutually recursive; there is one level
+ * of recursion for each segment in the pattern that contains one or more
+ * meta characters.
+ */
+static int
+my_glob2(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last,
+    Char *pattern, Char *pattern_last, my_glob_t *pmy_glob, struct my_glob_lim *limitp)
+{
+	struct stat sb;
+	Char *p, *q;
+	int anymeta;
+
+	/*
+	 * Loop over pattern segments until end of pattern or until
+	 * segment with meta character found.
+	 */
+	for (anymeta = 0;;) {
+		if (*pattern == EOS) {		/* End of pattern? */
+			*pathend = EOS;
+			if (g_lstat(pathbuf, &sb, pmy_glob))
+				return(0);
+
+			if ((pmy_glob->gl_flags & MYGLOB_LIMIT) &&
+			    limitp->glim_stat++ >= MYGLOB_LIMIT_STAT) {
+				errno = 0;
+				*pathend++ = SEP;
+				*pathend = EOS;
+				return(MYGLOB_NOSPACE);
+			}
+
+			if (((pmy_glob->gl_flags & MYGLOB_MARK) &&
+			    pathend[-1] != SEP) && (S_ISDIR(sb.st_mode) ||
+			    (S_ISLNK(sb.st_mode) &&
+			    (g_stat(pathbuf, &sb, pmy_glob) == 0) &&
+			    S_ISDIR(sb.st_mode)))) {
+				if (pathend+1 > pathend_last)
+					return (1);
+				*pathend++ = SEP;
+				*pathend = EOS;
+			}
+			++pmy_glob->gl_matchc;
+			return(my_globextend(pathbuf, pmy_glob, limitp, &sb));
+		}
+
+		/* Find end of next segment, copy tentatively to pathend. */
+		q = pathend;
+		p = pattern;
+		while (*p != EOS && *p != SEP) {
+			if (ismeta(*p))
+				anymeta = 1;
+			if (q+1 > pathend_last)
+				return (1);
+			*q++ = *p++;
+		}
+
+		if (!anymeta) {		/* No expansion, do next segment. */
+			pathend = q;
+			pattern = p;
+			while (*pattern == SEP) {
+				if (pathend+1 > pathend_last)
+					return (1);
+				*pathend++ = *pattern++;
+			}
+		} else
+			/* Need expansion, recurse. */
+			return(my_glob3(pathbuf, pathbuf_last, pathend,
+			    pathend_last, pattern, p, pattern_last,
+			    pmy_glob, limitp));
+	}
+	/* NOTREACHED */
+}
+
+static int
+my_glob1(Char *pattern, Char *pattern_last, my_glob_t *pmy_glob, struct my_glob_lim *limitp)
+{
+	Char pathbuf[MAXPATHLEN];
+
+	/* A null pathname is invalid -- POSIX 1003.1 sect. 2.4. */
+	if (*pattern == EOS)
+		return(0);
+	return(my_glob2(pathbuf, pathbuf+MAXPATHLEN-1,
+	    pathbuf, pathbuf+MAXPATHLEN-1,
+	    pattern, pattern_last, pmy_glob, limitp));
+}
+
+static int
+g_strncmp(const Char *s1, const char *s2, size_t n)
+{
+	int rv = 0;
+
+	while (n--) {
+		rv = *(Char *)s1 - *(const unsigned char *)s2++;
+		if (rv)
+			break;
+		if (*s1++ == '\0')
+			break;
+	}
+	return rv;
+}
+
+static int
+g_charclass(const Char **patternp, Char **bufnextp)
+{
+	const Char *pattern = *patternp + 1;
+	Char *bufnext = *bufnextp;
+	const Char *colon;
+	struct cclass *cc;
+	size_t len;
+
+	if ((colon = g_strchr(pattern, ':')) == NULL || colon[1] != ']')
+		return 1;	/* not a character class */
+
+	len = (size_t)(colon - pattern);
+	for (cc = cclasses; cc->name != NULL; cc++) {
+		if (!g_strncmp(pattern, cc->name, len) && cc->name[len] == '\0')
+			break;
+	}
+	if (cc->name == NULL)
+		return -1;	/* invalid character class */
+	*bufnext++ = M_CLASS;
+	*bufnext++ = (Char)(cc - &cclasses[0]);
+	*bufnextp = bufnext;
+	*patternp += len + 3;
+
+	return 0;
+}
+
+/*
+ * expand tilde from the passwd file.
+ */
+static const Char *
+my_globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, my_glob_t *pmy_glob)
+{
+	struct passwd *pwd;
+	char *h;
+	const Char *p;
+	Char *b, *eb;
+
+	if (*pattern != TILDE || !(pmy_glob->gl_flags & MYGLOB_TILDE))
+		return pattern;
+
+	/* Copy up to the end of the string or / */
+	eb = &patbuf[patbuf_len - 1];
+	for (p = pattern + 1, h = (char *) patbuf;
+	    h < (char *)eb && *p && *p != SLASH; *h++ = *p++)
+		;
+
+	*h = EOS;
+
+
+
+	if (((char *) patbuf)[0] == EOS) {
+		/*
+		 * handle a plain ~ or ~/ by expanding $HOME
+		 * first and then trying the password file
+		 */
+
+		if ((getuid() != geteuid()) || (h = getenv("HOME")) == NULL) {
+			if ((pwd = getpwuid(getuid())) == NULL)
+				return pattern;
+			else
+				h = pwd->pw_dir;
+		}
+	} else {
+		/*
+		 * Expand a ~user
+		 */
+		if ((pwd = getpwnam((char*) patbuf)) == NULL)
+			return pattern;
+		else
+			h = pwd->pw_dir;
+	}
+
+	/* Copy the home directory */
+	for (b = patbuf; b < eb && *h; *b++ = *h++)
+		;
+
+	/* Append the rest of the pattern */
+	while (b < eb && (*b++ = *p++) != EOS)
+		;
+	*b = EOS;
+
+	return patbuf;
+}
+
+/*
+ * The main my_glob() routine: compiles the pattern (optionally processing
+ * quotes), calls my_glob1() to do the real pattern matching, and finally
+ * sorts the list (unless unsorted operation is requested).  Returns 0
+ * if things went well, nonzero if errors occurred.  It is not an error
+ * to find no matches.
+ */
+static int
+my_glob0(const Char *pattern, my_glob_t *pmy_glob, struct my_glob_lim *limitp)
+{
+	const Char *qpatnext;
+	int c, err, oldpathc;
+	Char *bufnext, patbuf[MAXPATHLEN];
+
+	qpatnext = my_globtilde(pattern, patbuf, MAXPATHLEN, pmy_glob);
+	oldpathc = pmy_glob->gl_pathc;
+	bufnext = patbuf;
+
+	/* We don't need to check for buffer overflow any more. */
+	while ((c = *qpatnext++) != EOS) {
+		switch (c) {
+		case LBRACKET:
+			c = *qpatnext;
+			if (c == NOT)
+				++qpatnext;
+			if (*qpatnext == EOS ||
+			    g_strchr(qpatnext+1, RBRACKET) == NULL) {
+				*bufnext++ = LBRACKET;
+				if (c == NOT)
+					--qpatnext;
+				break;
+			}
+			*bufnext++ = M_SET;
+			if (c == NOT)
+				*bufnext++ = M_NOT;
+			c = *qpatnext++;
+			do {
+				if (c == LBRACKET && *qpatnext == ':') {
+					do {
+						err = g_charclass(&qpatnext,
+						    &bufnext);
+						if (err)
+							break;
+						c = *qpatnext++;
+					} while (c == LBRACKET && *qpatnext == ':');
+					if (err == -1 &&
+					    !(pmy_glob->gl_flags & MYGLOB_NOCHECK))
+						return MYGLOB_NOMATCH;
+					if (c == RBRACKET)
+						break;
+				}
+				*bufnext++ = CHAR(c);
+				if (*qpatnext == RANGE &&
+				    (c = qpatnext[1]) != RBRACKET) {
+					*bufnext++ = M_RNG;
+					*bufnext++ = CHAR(c);
+					qpatnext += 2;
+				}
+			} while ((c = *qpatnext++) != RBRACKET);
+			pmy_glob->gl_flags |= MYGLOB_MAGCHAR;
+			*bufnext++ = M_END;
+			break;
+		case QUESTION:
+			pmy_glob->gl_flags |= MYGLOB_MAGCHAR;
+			*bufnext++ = M_ONE;
+			break;
+		case STAR:
+			pmy_glob->gl_flags |= MYGLOB_MAGCHAR;
+			/* collapse adjacent stars to one,
+			 * to avoid exponential behavior
+			 */
+			if (bufnext == patbuf || bufnext[-1] != M_ALL)
+				*bufnext++ = M_ALL;
+			break;
+		default:
+			*bufnext++ = CHAR(c);
+			break;
+		}
+	}
+	*bufnext = EOS;
+#ifdef DEBUG
+	qprintf("my_glob0:", patbuf);
+#endif
+
+	if ((err = my_glob1(patbuf, patbuf+MAXPATHLEN-1, pmy_glob, limitp)) != 0)
+		return(err);
+
+	/*
+	 * If there was no match we are going to append the pattern
+	 * if MYGLOB_NOCHECK was specified or if MYGLOB_NOMAGIC was specified
+	 * and the pattern did not contain any magic characters
+	 * MYGLOB_NOMAGIC is there just for compatibility with csh.
+	 */
+	if (pmy_glob->gl_pathc == oldpathc) {
+		if ((pmy_glob->gl_flags & MYGLOB_NOCHECK) ||
+		    ((pmy_glob->gl_flags & MYGLOB_NOMAGIC) &&
+		    !(pmy_glob->gl_flags & MYGLOB_MAGCHAR)))
+			return(my_globextend(pattern, pmy_glob, limitp, NULL));
+		else
+			return(MYGLOB_NOMATCH);
+	}
+	if (!(pmy_glob->gl_flags & MYGLOB_NOSORT))
+		qsort(pmy_glob->gl_pathv + pmy_glob->gl_offs + oldpathc,
+		    pmy_glob->gl_pathc - oldpathc, sizeof(char *), compare);
+	return(0);
+}
+
+/*
+ * Expand recursively a my_glob {} pattern. When there is no more expansion
+ * invoke the standard my_globbing routine to my_glob the rest of the magic
+ * characters
+ */
+static int
+my_globexp1(const Char *pattern, my_glob_t *pmy_glob, struct my_glob_lim *limitp)
+{
+	const Char* ptr = pattern;
+
+	/* Protect a single {}, for find(1), like csh */
+	if (pattern[0] == LBRACE && pattern[1] == RBRACE && pattern[2] == EOS)
+		return my_glob0(pattern, pmy_glob, limitp);
+
+	if ((ptr = (const Char *) g_strchr(ptr, LBRACE)) != NULL)
+		return my_globexp2(ptr, pattern, pmy_glob, limitp);
+
+	return my_glob0(pattern, pmy_glob, limitp);
+}
+
+
+
+
+int
+my_glob(const char *pattern, int flags, int (*errfunc)(const char *, int),
+    my_glob_t *pmy_glob)
+{
+	const u_char *patnext;
+	int c;
+	Char *bufnext, *bufend, patbuf[MAXPATHLEN];
+	struct my_glob_lim limit = { 0, 0, 0 };
+
+	patnext = (u_char *) pattern;
+	if (!(flags & MYGLOB_APPEND)) {
+		pmy_glob->gl_pathc = 0;
+		pmy_glob->gl_pathv = NULL;
+		pmy_glob->gl_statv = NULL;
+		if (!(flags & MYGLOB_DOOFFS))
+			pmy_glob->gl_offs = 0;
+	}
+	pmy_glob->gl_flags = flags & ~MYGLOB_MAGCHAR;
+	pmy_glob->gl_errfunc = errfunc;
+	pmy_glob->gl_matchc = 0;
+
+	if (pmy_glob->gl_offs < 0 || pmy_glob->gl_pathc < 0 ||
+	    pmy_glob->gl_offs >= INT_MAX || pmy_glob->gl_pathc >= INT_MAX ||
+	    pmy_glob->gl_pathc >= INT_MAX - pmy_glob->gl_offs - 1)
+		return MYGLOB_NOSPACE;
+
+	bufnext = patbuf;
+	bufend = bufnext + MAXPATHLEN - 1;
+	if (flags & MYGLOB_NOESCAPE)
+		while (bufnext < bufend && (c = *patnext++) != EOS)
+			*bufnext++ = c;
+	else {
+		/* Protect the quoted characters. */
+		while (bufnext < bufend && (c = *patnext++) != EOS)
+			if (c == QUOTE) {
+				if ((c = *patnext++) == EOS) {
+					c = QUOTE;
+					--patnext;
+				}
+				*bufnext++ = c | M_PROTECT;
+			} else
+				*bufnext++ = c;
+	}
+	*bufnext = EOS;
+
+	if (flags & MYGLOB_BRACE)
+		return my_globexp1(patbuf, pmy_glob, &limit);
+	else
+		return my_glob0(patbuf, pmy_glob, &limit);
+}
+
+
+
+
+
+
+
 
 
 enum SGPFileFlags
@@ -64,19 +962,21 @@ SGP::FindFiles::FindFiles(char const* const pattern) :
 		return;
 	}
 #else
-	glob_t* const g = &glob_data_;
-	switch (glob(pattern, GLOB_NOSORT, 0, g))
+	my_glob_t* const g = &my_glob_data_;
+	switch (my_glob(pattern, MYGLOB_NOSORT, 0, g))
 	{
 		case 0:
-		case GLOB_NOMATCH:
+		case MYGLOB_NOMATCH:
 			return;
 
 		default:
-			globfree(g);
+			my_globfree(g);
 			break;
 	}
 #endif
-	throw std::runtime_error("Failed to start file search");
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Failed to start file search, pattern:  %s", pattern);
+	//throw std::runtime_error("Failed to start file search");
+	return;
 }
 
 
@@ -85,7 +985,7 @@ SGP::FindFiles::~FindFiles()
 #ifdef _WIN32
 	if (find_handle_) FindClose(find_handle_);
 #else
-	globfree(&glob_data_);
+	my_globfree(&my_glob_data_);
 #endif
 }
 
@@ -102,12 +1002,13 @@ char const* SGP::FindFiles::Next()
 	else if (!FindNextFile(find_handle_, &find_data_))
 	{
 		if (GetLastError() == ERROR_NO_MORE_FILES) return 0;
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Failed to get next file in search");
 		throw std::runtime_error("Failed to get next file in file search");
 	}
 	return find_data_.cFileName;
 #else
-	if (index_ >= glob_data_.gl_pathc) return 0;
-	char const* const path  = glob_data_.gl_pathv[index_++];
+	if (index_ >= my_glob_data_.gl_pathc) return 0;
+	char const* const path  = my_glob_data_.gl_pathv[index_++];
 	char const* const start = strrchr(path, '/');
 	return start ? start + 1 : path;
 #endif
@@ -191,18 +1092,20 @@ void InitializeFileManager(void)
 
 #endif
 
-	snprintf(LocalPath, lengthof(LocalPath), "%s/" LOCALDIR, home);
-	if (mkdir(LocalPath, 0700) != 0 && errno != EEXIST)
-	{
-		throw std::runtime_error("Unable to create directory \"" LOCALDIR "\"");
-	}
+	//snprintf(LocalPath, lengthof(LocalPath), "%s/" LOCALDIR, home);
+	//if (mkdir(LocalPath, 0700) != 0 && errno != EEXIST)
+	//{
+	//	throw std::runtime_error("Unable to create directory \"" LOCALDIR "\"");
+	//}
 
-	char DataPath[512];
-	snprintf(DataPath, lengthof(DataPath), "%s/" BASEDATADIR, LocalPath);
-	if (mkdir(DataPath, 0700) != 0 && errno != EEXIST)
-	{
-		throw std::runtime_error("Unable to create directory \"" LOCALDIR "/" BASEDATADIR "\"");
-	}
+	//char DataPath[512];
+	//snprintf(DataPath, lengthof(DataPath), "%s/" BASEDATADIR, LocalPath);
+	//if (mkdir(DataPath, 0700) != 0 && errno != EEXIST)
+	//{
+	//	throw std::runtime_error("Unable to create directory \"" LOCALDIR "/" BASEDATADIR "\"");
+	//}
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", " Initialize the Binding Data Dir");
+
 	BinDataDir = ConfigRegisterKey("data_dir");
 
 #if defined __APPLE__  && defined __MACH__
@@ -210,17 +1113,25 @@ void InitializeFileManager(void)
 #endif
 
 	char ConfigFile[512];
-	snprintf(ConfigFile, lengthof(ConfigFile), "%s/ja2.ini", LocalPath);
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", " Binding Config File");
+
+	snprintf(ConfigFile, lengthof(ConfigFile), "/sdcard/app-data/com.opensourced.ja2/ja2.ini");
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "Parsing config");
+
 	if (ConfigParseFile(ConfigFile))
 	{
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "WARNING: Could not open configuration file (\"%s\").\n", ConfigFile);
+
 		fprintf(stderr, "WARNING: Could not open configuration file (\"%s\").\n", ConfigFile);
 	}
 
 	if (GetBinDataPath() == NULL)
 	{
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "Path to binary data is not set.");
 		TellAboutDataDir(ConfigFile);
 		throw std::runtime_error("Path to binary data is not set.");
 	}
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "FileManager Done!");
 }
 
 
@@ -263,15 +1174,60 @@ void FileDelete(char const* const path)
 		default: break;
 	}
 
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Deleting File Failed!");
+
 	throw std::runtime_error("Deleting file failed");
 }
 
 
 HWFILE FileOpen(const char* const filename, const FileOpenFlags flags)
 {
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "File open called on %s", filename);
 #ifndef _WIN32
 #	define O_BINARY 0
 #endif
+	
+	std::string androidpath="/sdcard/app-data/com.opensourced.ja2/";
+	
+	std::string flatfile1 = "temp/files.dat"; // open this directly
+	std::string flatfile2 = "../Ja2.set"; // open this directly
+	std::string flatfile3 = "temp/finances.dat";
+	std::string flatfile4 = "temp/history.dat";
+	std::string flatfile5 = "../SavedGames/error.sav";
+	std::string flatfile6 = "../SavedGames/QuickSave.sav";
+	std::string flatfile7 = "../SavedGames/SaveGame01.sav";
+	std::string flatfile8 = "../SavedGames/SaveGame02.sav";
+	std::string flatfile9 = "../SavedGames/SaveGame03.sav";
+	std::string flatfile10 = "../SavedGames/SaveGame04.sav";
+	std::string flatfile11 = "../SavedGames/SaveGame05.sav";
+	std::string flatfile12 = "../SavedGames/SaveGame06.sav";
+	std::string flatfile13 = "../SavedGames/SaveGame07.sav";
+	std::string flatfile14 = "../SavedGames/SaveGame08.sav";
+	std::string flatfile15 = "../SavedGames/SaveGame09.sav";
+	std::string flatfile16 = "../SavedGames/SaveGame10.sav";
+	
+	std::string sfilename = androidpath + filename;
+	const char *bfilename = filename;
+	
+	if (filename == flatfile1) bfilename = sfilename.c_str();// direct!!
+	if (filename == flatfile2) bfilename = "/sdcard/app-data/com.opensourced.ja2/Ja2.set";
+	if (filename == flatfile3) bfilename = sfilename.c_str();
+	if (filename == flatfile4) bfilename = sfilename.c_str();
+	if (filename == flatfile5) bfilename = "/sdcard/app-data/com.opensourced.ja2/error.sav";
+	if (filename == flatfile6) bfilename = "/sdcard/app-data/com.opensourced.ja2/QuickSave.sav";
+	if (filename == flatfile7) bfilename = "/sdcard/app-data/com.opensourced.ja2/SaveGame01.sav";
+	if (filename == flatfile8) bfilename = "/sdcard/app-data/com.opensourced.ja2/SaveGame02.sav";
+	if (filename == flatfile9) bfilename = "/sdcard/app-data/com.opensourced.ja2/SaveGame03.sav";
+	if (filename == flatfile10) bfilename = "/sdcard/app-data/com.opensourced.ja2/SaveGame04.sav";
+	if (filename == flatfile11) bfilename = "/sdcard/app-data/com.opensourced.ja2/SaveGame05.sav";
+	if (filename == flatfile12) bfilename = "/sdcard/app-data/com.opensourced.ja2/SaveGame06.sav";
+	if (filename == flatfile13) bfilename = "/sdcard/app-data/com.opensourced.ja2/SaveGame07.sav";
+	if (filename == flatfile14) bfilename = "/sdcard/app-data/com.opensourced.ja2/SaveGame08.sav";
+	if (filename == flatfile15) bfilename = "/sdcard/app-data/com.opensourced.ja2/SaveGame09.sav";
+	if (filename == flatfile16) bfilename = "/sdcard/app-data/com.opensourced.ja2/SaveGame10.sav";
+	
+	
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "bfilename= %s", bfilename);
 	const char* fmode;
 	int         mode = O_BINARY;
 	switch (flags & (FILE_ACCESS_READWRITE | FILE_ACCESS_APPEND))
@@ -290,28 +1246,28 @@ HWFILE FileOpen(const char* const filename, const FileOpenFlags flags)
 	int d;
 	if (flags & FILE_CREATE_ALWAYS)
 	{
-		d = open(filename, mode | O_CREAT | O_TRUNC, 0600);
+		d = open(bfilename, mode | O_CREAT | O_TRUNC, 0600);
 	}
 	else if (flags & (FILE_ACCESS_WRITE | FILE_ACCESS_APPEND))
 	{
 		if (flags & FILE_OPEN_ALWAYS) mode |= O_CREAT;
-		d = open(filename, mode, 0600);
+		d = open(bfilename, mode, 0600);
 	}
 	else
 	{
-		d = open(filename, mode);
+		d = open(bfilename, mode);
 		if (d < 0)
 		{
 			char path[512];
-			snprintf(path, lengthof(path), "%s/" BASEDATADIR "/%s", GetBinDataPath(), filename);
+			snprintf(path, lengthof(path), "%s/" BASEDATADIR "/%s", GetBinDataPath(), bfilename);
 			d = open(path, mode);
 			if (d < 0)
 			{
-				if (OpenFileFromLibrary(filename, &file->u.lib)) return file.Release();
+				if (OpenFileFromLibrary(bfilename, &file->u.lib)) return file.Release();
 
 				if (flags & FILE_OPEN_ALWAYS)
 				{
-					d = open(filename, mode | O_CREAT, 0600);
+					d = open(bfilename, mode | O_CREAT, 0600);
 				}
 			}
 		}
@@ -321,12 +1277,16 @@ HWFILE FileOpen(const char* const filename, const FileOpenFlags flags)
 	sError += filename;
 	sError += " (from fd)";
 	if (d < 0)
+	{
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Opening file failed! %s", bfilename);
 		throw std::runtime_error(sError);
+	}
 
 	FILE* const f = fdopen(d, fmode);
 	if (!f)
 	{
 		close(d);
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Opening file failed! %s", bfilename);
 		throw std::runtime_error(sError);
 	}
 
@@ -378,14 +1338,23 @@ void FileRead(HWFILE const f, void* const pDest, UINT32 const uiBytesToRead)
 	uiTotalFileReadCalls++;
 #endif
 
-	if (!ret) throw std::runtime_error("Reading from file failed");
+	if (!ret) {
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: reading from file failed!");
+		throw std::runtime_error("Reading from file failed");
+	}
 }
 
 
 void FileWrite(HWFILE const f, void const* const pDest, UINT32 const uiBytesToWrite)
 {
-	if (!(f->flags & SGPFILE_REAL)) throw std::logic_error("Tried to write to library file");
-	if (fwrite(pDest, uiBytesToWrite, 1, f->u.file) != 1) throw std::runtime_error("Writing to file failed");
+	if (!(f->flags & SGPFILE_REAL)) {
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Tried to write to library file");
+		throw std::logic_error("Tried to write to library file");
+	}
+	if (fwrite(pDest, uiBytesToWrite, 1, f->u.file) != 1) {
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Writing to file failed");
+		throw std::runtime_error("Writing to file failed");
+	}
 }
 
 
@@ -408,7 +1377,10 @@ void FileSeek(HWFILE const f, INT32 distance, FileSeekMode const how)
 	{
 		success = LibraryFileSeek(&f->u.lib, distance, how);
 	}
-	if (!success) throw std::runtime_error("Seek in file failed");
+	if (!success) {
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Seek in file failed!");
+		throw std::runtime_error("Seek in file failed");
+	}
 }
 
 
@@ -425,6 +1397,7 @@ UINT32 FileGetSize(const HWFILE f)
 		struct stat sb;
 		if (fstat(fileno(f->u.file), &sb) != 0)
 		{
+			__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: getting filesize failed!");
 			throw std::runtime_error("Getting file size failed");
 		}
 		return sb.st_size;
@@ -444,6 +1417,7 @@ void SetFileManCurrentDirectory(char const* const pcDirectory)
 	if (!SetCurrentDirectory(pcDirectory))
 #endif
 	{
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Change directory failed");
 		throw std::runtime_error("Changing directory failed");
 	}
 }
@@ -451,15 +1425,15 @@ void SetFileManCurrentDirectory(char const* const pcDirectory)
 
 void MakeFileManDirectory(char const* const path)
 {
-	if (mkdir(path, 0755) == 0) return;
+	if (mkdir("/sdcard/app-data/com.opensourced.ja2/temp", 0755) == 0) return;
 
 	if (errno == EEXIST)
 	{
 		FileAttributes const attr = FileGetAttributes(path);
 		if (attr != FILE_ATTR_ERROR && attr & FILE_ATTR_DIRECTORY) return;
 	}
-
-	throw std::runtime_error("Failed to create directory");
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "create directory failed: %s", path);
+	//throw std::runtime_error("Failed to create directory");
 }
 
 

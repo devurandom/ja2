@@ -27,6 +27,7 @@
 #include "Town_Militia.h"
 #include "EMail.h"
 
+#include "Font.h"
 
 #ifdef JA2TESTVERSION
 // comment out to get rid of stat change msgs
@@ -1510,8 +1511,19 @@ void BuildStatChangeString(wchar_t* const wString, size_t const Length, wchar_t 
 		ubStringIndex += 2;
 	}
 
-	swprintf( wString, Length, L"%ls %ls %d %ls %ls", wName, sPreStatBuildString[ fIncrease ? 1 : 0 ], abs( sPtsChanged ),
-					sPreStatBuildString[ ubStringIndex ], sStatGainStrings[ ubStat - FIRST_CHANGEABLE_STAT ] );
+     // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[512];
+            char buf2[512];
+            char buf3[512];
+            char buf4[512];
+            my__wchar2char(wName , buf1);
+            my__wchar2char( sPreStatBuildString[ fIncrease ? 1 : 0 ] , buf2);
+            my__wchar2char(sPreStatBuildString[ ubStringIndex ] , buf3);
+            my__wchar2char(sStatGainStrings[ ubStat - FIRST_CHANGEABLE_STAT ] , buf4);
+	swprintf( wString, Length, L"%s %s %d %s %s", buf1,buf2, abs( sPtsChanged ),
+					buf3, buf4 );
+//    swprintf( wString, Length, L"%ls %ls %d %ls %ls", wName, sPreStatBuildString[ fIncrease ? 1 : 0 ], abs( sPtsChanged ),
+//					sPreStatBuildString[ ubStringIndex ], sStatGainStrings[ ubStat - FIRST_CHANGEABLE_STAT ] );
 }
 
 

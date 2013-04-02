@@ -1883,7 +1883,13 @@ void InternalInitItemDescriptionBox(OBJECTTYPE* const o, const INT16 sX, const I
 				GenerateConsString(FullItemTemp, *o, 1000);
 			}
 			wchar_t text[SIZE_ITEM_PROS];
-			swprintf(text, lengthof(text), L"%ls %ls", label, FullItemTemp);
+			// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[512];
+            char buf2[512];
+            my__wchar2char( label, buf1);
+            my__wchar2char( FullItemTemp, buf2);
+			swprintf(text, lengthof(text), L"%s %s", buf1, buf2);
+			//swprintf(text, lengthof(text), L"%ls %ls", label, FullItemTemp);
 			r->SetFastHelpText(text);
 		}
 	}
@@ -2369,12 +2375,24 @@ void RenderItemDescriptionBox(void)
 			size_t            n = 0;
 			if (w.ubCalibre != NOAMMO)
 			{
-				n += swprintf(pStr, lengthof(pStr), L"%ls ", AmmoCaliber[w.ubCalibre]);
+			    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                char buf1[512];
+                my__wchar2char( AmmoCaliber[w.ubCalibre], buf1);
+				n += swprintf(pStr, lengthof(pStr), L"%s ", buf1);
+				//n += swprintf(pStr, lengthof(pStr), L"%ls ", AmmoCaliber[w.ubCalibre]);
 			}
-			n += swprintf(pStr + n, lengthof(pStr) - n, L"%ls", WeaponType[w.ubWeaponType]);
+			// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                char buf2[512];
+                my__wchar2char( WeaponType[w.ubWeaponType], buf2);
+			n += swprintf(pStr + n, lengthof(pStr) - n, L"%s", buf2);
+			//n += swprintf(pStr + n, lengthof(pStr) - n, L"%ls", WeaponType[w.ubWeaponType]);
 			if (wchar_t const* const imprint = GetObjectImprint(obj))
 			{ // Add name noting imprint
-				n += swprintf(pStr + n, lengthof(pStr) - n, L" (%ls)", imprint);
+			    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                char buf3[512];
+                my__wchar2char( imprint, buf3);
+				n += swprintf(pStr + n, lengthof(pStr) - n, L" (%s)", buf3);
+				//n += swprintf(pStr + n, lengthof(pStr) - n, L" (%ls)", imprint);
 			}
 
 			SGPBox const& xy = in_map ? gMapDescNameBox : gDescNameBox;
@@ -4120,8 +4138,9 @@ SGPVObject* LoadTileGraphicForItem(const INVTYPE& item)
 
 	//Load item
 	SGPFILENAME ImageFile;
-	sprintf(ImageFile, BIGITEMSDIR "/%s%02d.sti", Prefix, item.ubGraphicNum);
-	return AddVideoObjectFromFile(ImageFile);
+	// MADE ARM SPECIFIC CHANGE HERE
+	sprintf((char*)ImageFile, BIGITEMSDIR "/%s%02d.sti", Prefix, item.ubGraphicNum);
+	return AddVideoObjectFromFile((char*)ImageFile);
 }
 
 
@@ -4774,7 +4793,13 @@ void RenderItemPickupMenu()
 			{
 				wchar_t pStr2[20];
 				SPrintMoney(pStr2, o.uiMoneyAmount);
-				swprintf(pStr, lengthof(pStr), L"%ls (%ls)", ItemNames[o.usItem], pStr2);
+				// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                char buf1[512];
+                char buf2[512];
+                my__wchar2char(  ItemNames[o.usItem], buf1);
+                my__wchar2char( pStr2, buf2);
+				swprintf(pStr, lengthof(pStr), L"%s (%s)",buf1, buf2);
+				//swprintf(pStr, lengthof(pStr), L"%ls (%ls)", ItemNames[o.usItem], pStr2);
 			}
 			else
 			{
@@ -5188,7 +5213,13 @@ void GetHelpTextForItem(wchar_t* const dst, size_t const length, OBJECTTYPE cons
 	{ // alternate money like silver or gold
 		wchar_t pStr2[20];
 		SPrintMoney(pStr2, obj.uiMoneyAmount);
-		swprintf(dst, length, L"%ls (%ls)", ItemNames[usItem], pStr2);
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                char buf1[512];
+                char buf2[512];
+                my__wchar2char(  ItemNames[usItem], buf1);
+                my__wchar2char(pStr2, buf2);
+		swprintf(dst, length, L"%s (%s)", buf1, buf2);
+		//swprintf(dst, length, L"%ls (%ls)", ItemNames[usItem], pStr2);
 	}
 	else if (usItem == NOTHING)
 	{
@@ -5196,19 +5227,32 @@ void GetHelpTextForItem(wchar_t* const dst, size_t const length, OBJECTTYPE cons
 	}
 	else
 	{
-		size_t n = swprintf(dst, length, L"%ls", ItemNames[usItem]);
+	    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+        char buf1[512];
+        my__wchar2char(  ItemNames[usItem], buf1);
+
+		size_t n = swprintf(dst, length, L"%s", buf1);
+		//size_t n = swprintf(dst, length, L"%ls", ItemNames[usItem]);
 		if (!gGameOptions.fGunNut && Item[usItem].usItemClass == IC_GUN)
 		{
 			AmmoKind const calibre = Weapon[usItem].ubCalibre;
 			if (calibre != NOAMMO && calibre != AMMOROCKET)
 			{
-				n += swprintf(dst + n, length - n, L" (%ls)", AmmoCaliber[calibre]);
+			    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                char buf2[512];
+                my__wchar2char( AmmoCaliber[calibre], buf2);
+				n += swprintf(dst + n, length - n, L" (%s)", buf2);
+				//n += swprintf(dst + n, length - n, L" (%ls)", AmmoCaliber[calibre]);
 			}
 		}
 
 		if (wchar_t const* const imprint = GetObjectImprint(obj))
 		{
-			n += swprintf(dst + n, length - n, L" [%ls]", imprint);
+		     // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                char buf3[512];
+                my__wchar2char( imprint, buf3);
+			n += swprintf(dst + n, length - n, L" [%s]", buf3);
+			//n += swprintf(dst + n, length - n, L" [%ls]", imprint);
 		}
 
 		// Add attachment string....
@@ -5218,13 +5262,22 @@ void GetHelpTextForItem(wchar_t* const dst, size_t const length, OBJECTTYPE cons
 		{
 			UINT16 const attachment = *i;
 			if (attachment == NOTHING) continue;
-
-			n += swprintf(dst + n, length - n, L"%ls%ls", prefix, ItemNames[attachment]);
+            // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                char buf4[512];
+                char buf5[512];
+                my__wchar2char( prefix, buf4);
+                my__wchar2char( ItemNames[attachment], buf5);
+			n += swprintf(dst + n, length - n, L"%s%s", buf4, buf5);
+			//n += swprintf(dst + n, length - n, L"%ls%ls", prefix, ItemNames[attachment]);
 			prefix = L",\n";
 		}
 		if (prefix != first_prefix)
 		{
-			n += swprintf(dst + n, length - n, L"%ls", pMessageStrings[MSG_END_ATTACHMENT_LIST]);
+		    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf6[512];
+            my__wchar2char( pMessageStrings[MSG_END_ATTACHMENT_LIST], buf6);
+			n += swprintf(dst + n, length - n, L"%s", buf6);
+			//n += swprintf(dst + n, length - n, L"%ls", pMessageStrings[MSG_END_ATTACHMENT_LIST]);
 		}
 	}
 }

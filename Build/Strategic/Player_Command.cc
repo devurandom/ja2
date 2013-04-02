@@ -22,6 +22,7 @@
 #include "Map_Screen_Interface.h"
 #include "Tactical_Save.h"
 
+#include "Font.h"
 
 void GetSectorFacilitiesFlags(INT16 const x, INT16 const y, wchar_t* const buf, size_t const length)
 {
@@ -33,14 +34,20 @@ void GetSectorFacilitiesFlags(INT16 const x, INT16 const y, wchar_t* const buf, 
 		return;
 	}
 
-	wchar_t const* fmt = L"%ls";
+	wchar_t const* fmt = L"%s";
+	//wchar_t const* fmt = L"%ls";
 	size_t         n   = 0;
 	for (size_t i = 0;; ++i)
 	{
 		UINT32 const bit = 1 << i;
 		if (!(facilities & bit)) continue;
-		n  += swprintf(buf + n, length - n, fmt, sFacilitiesStrings[i + 1]);
-		fmt = L",%ls";
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[128];
+            my__wchar2char(sFacilitiesStrings[i + 1] , buf1);
+		n  += swprintf(buf + n, length - n, fmt, buf1);
+		//n  += swprintf(buf + n, length - n, fmt, sFacilitiesStrings[i + 1]);
+		fmt = L",%s";
+		//fmt = L",%ls";
 		if ((facilities & ~(bit - 1)) == bit) break;
 	}
 }

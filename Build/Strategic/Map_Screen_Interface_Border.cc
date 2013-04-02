@@ -23,6 +23,8 @@
 #include "Debug.h"
 #include "Video.h"
 
+#include "Font.h"
+
 
 #ifdef JA2DEMO
 #	define MAP_BORDER_FILE INTERFACEDIR "/mapborder0225.sti"
@@ -973,7 +975,13 @@ void CreateMouseRegionsForLevelMarkers(void)
 		MSYS_SetRegionUserData(r, 0, sCounter);
 
 		wchar_t sString[64];
-		swprintf(sString, lengthof(sString), L"%ls %d", zMarksMapScreenText[0], sCounter + 1);
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[256];
+                    //char buf2[256];
+                    my__wchar2char( zMarksMapScreenText[0], buf1);
+                    //my__wchar2char( pAssignmentStrings[pSoldierMovingList[iCount]->bAssignment], buf2);
+		swprintf(sString, lengthof(sString), L"%s %d", buf1, sCounter + 1);
+		//swprintf(sString, lengthof(sString), L"%ls %d", zMarksMapScreenText[0], sCounter + 1);
 		r->SetFastHelpText(sString);
   }
 }

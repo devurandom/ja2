@@ -10,11 +10,11 @@
 #if defined(__linux__) || defined(_WIN32)
 
 size_t wcslcpy(wchar_t* dst, const wchar_t* src, size_t size);
-size_t strlcpy(char* dst, const char* src, size_t size);
+size_t my_strlcpy(char* dst, const char* src, size_t size);
 
 #endif
 
-
+//#define _WIN32 1
 #ifdef _WIN32
 
 #include <stdarg.h>

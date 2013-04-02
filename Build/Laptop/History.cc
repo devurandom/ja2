@@ -557,8 +557,15 @@ static void DisplayPageNumberAndDateRange(void)
 	}
 
 	SetFontAttributes(HISTORY_TEXT_FONT, FONT_BLACK, NO_SHADOW);
-	mprintf(PAGE_NUMBER_X,  PAGE_NUMBER_Y,  L"%ls  %d / %d", pHistoryHeaders[1], current_page, count_pages);
-	mprintf(HISTORY_DATE_X, HISTORY_DATE_Y, L"%ls %d - %d",  pHistoryHeaders[2], first_date,   last_date);
+                    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[512];
+                    char buf2[512];
+                    my__wchar2char(pHistoryHeaders[1], buf1);
+                    my__wchar2char(pHistoryHeaders[2], buf2);
+	//mprintf(PAGE_NUMBER_X,  PAGE_NUMBER_Y,  L"%ls  %d / %d", buf1, current_page, count_pages);
+	mprintf(PAGE_NUMBER_X,  PAGE_NUMBER_Y,  L"%s  %d / %d", buf1, current_page, count_pages);
+	//mprintf(HISTORY_DATE_X, HISTORY_DATE_Y, L"%ls %d - %d",  buf2, first_date,   last_date);
+	mprintf(HISTORY_DATE_X, HISTORY_DATE_Y, L"%s %d - %d",  buf2, first_date,   last_date);
 	SetFontShadow(DEFAULT_SHADOW);
 }
 

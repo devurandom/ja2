@@ -51,6 +51,7 @@
 #include "ScreenIDs.h"
 #include "FileMan.h"
 #include "Items.h"
+#include "Font.h"
 
 
 // the delay for a group about to arrive
@@ -1146,10 +1147,11 @@ static void AddCorpsesToBloodcatLair(INT16 sSectorX, INT16 sSectorY)
 	Corpse.sHeightAdjustment			= 0;
 	Corpse.bVisible								=	TRUE;
 
-	SET_PALETTEREP_ID ( Corpse.HeadPal,		"BROWNHEAD" );
-	SET_PALETTEREP_ID ( Corpse.VestPal,		"YELLOWVEST" );
-	SET_PALETTEREP_ID ( Corpse.SkinPal,		"PINKSKIN" );
-	SET_PALETTEREP_ID ( Corpse.PantsPal,  "GREENPANTS" );
+	// MADE ARM SPECIFIC CHANGE HERE
+	SET_PALETTEREP_ID ( (char*)Corpse.HeadPal,		"BROWNHEAD" );
+	SET_PALETTEREP_ID ( (char*)Corpse.VestPal,		"YELLOWVEST" );
+	SET_PALETTEREP_ID ( (char*)Corpse.SkinPal,		"PINKSKIN" );
+	SET_PALETTEREP_ID ( (char*)Corpse.PantsPal,  "GREENPANTS" );
 
 
 	Corpse.bDirection	= (INT8)Random(8);
@@ -1722,7 +1724,11 @@ static BOOLEAN PossibleToCoordinateSimultaneousGroupArrivals(GROUP* const first_
 	 *      arrive.  Do you wish to coordinate a simultaneous arrival? */
 	wchar_t str[255];
 	size_t const n = swprintf(str, lengthof(str), pStr, enemy_type, 'A' + first_group->ubSectorY - 1, first_group->ubSectorX);
-	swprintf(str + n, lengthof(str) - n, L" %ls", gpStrategicString[STR_COORDINATE]);
+	// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[512];
+            my__wchar2char(gpStrategicString[STR_COORDINATE] , buf1);
+	//swprintf(str + n, lengthof(str) - n, L" %ls", gpStrategicString[STR_COORDINATE]);
+	swprintf(str + n, lengthof(str) - n, L" %s", buf1);
 	DoMapMessageBox(MSG_BOX_BASIC_STYLE, str, guiCurrentScreen, MSG_BOX_FLAG_YESNO, PlanSimultaneousGroupArrivalCallback);
 	gfWaitingForInput = TRUE;
 	return TRUE;

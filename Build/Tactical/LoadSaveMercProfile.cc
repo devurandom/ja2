@@ -366,6 +366,9 @@ void ExtractMercProfile(BYTE const* const Src, MERCPROFILESTRUCT& p)
 	EXTR_WSTR16(S, p.zName, lengthof(p.zName))
 	EXTR_WSTR16(S, p.zNickname, lengthof(p.zNickname))
 #else
+    // ANDROID HACK!!!
+	//EXTR_WSTR16(S, p.zName, lengthof(p.zName))
+	//EXTR_WSTR16(S, p.zNickname, lengthof(p.zNickname))
 	EXTR_WSTR32(S, p.zName, lengthof(p.zName))
 	EXTR_WSTR32(S, p.zNickname, lengthof(p.zNickname))
 #endif
@@ -559,6 +562,9 @@ void InjectMercProfile(BYTE* const Dst, MERCPROFILESTRUCT const& p)
 	INJ_WSTR16(D, p.zName, lengthof(p.zName))
 	INJ_WSTR16(D, p.zNickname, lengthof(p.zNickname))
 #else
+    // ANDROID HACK
+	//INJ_WSTR16(D, p.zName, lengthof(p.zName))
+	//INJ_WSTR16(D, p.zNickname, lengthof(p.zNickname))
 	INJ_WSTR32(D, p.zName, lengthof(p.zName))
 	INJ_WSTR32(D, p.zNickname, lengthof(p.zNickname))
 #endif

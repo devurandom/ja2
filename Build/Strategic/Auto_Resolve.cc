@@ -1508,12 +1508,26 @@ static void RenderAutoResolve(void)
 
 			//Render the total battle time elapsed.
 			SetFont( FONT10ARIAL );
-			swprintf(str, lengthof(str), L"%ls:  %d%ls %02d%ls",
-				gpStrategicString[ STR_AR_TIME_ELAPSED ],
+			// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                            char buf1[128];
+                            char buf2[128];
+                            char buf3[128];
+                            //char buf4[256];
+                            my__wchar2char( gpStrategicString[ STR_AR_TIME_ELAPSED ], buf1);
+                            my__wchar2char( gsTimeStrings[1], buf2);
+                            my__wchar2char( gsTimeStrings[2], buf3);
+			swprintf(str, lengthof(str), L"%s:  %d%s %02d%s",
+				buf1,
 				gpAR->uiTotalElapsedBattleTimeInMilliseconds/60000,
-				gsTimeStrings[1],
+				buf2,
 				gpAR->uiTotalElapsedBattleTimeInMilliseconds % 60000 / 1000,
-				gsTimeStrings[2]);
+				buf3);
+//            swprintf(str, lengthof(str), L"%ls:  %d%ls %02d%ls",
+//				gpStrategicString[ STR_AR_TIME_ELAPSED ],
+//				gpAR->uiTotalElapsedBattleTimeInMilliseconds/60000,
+//				gsTimeStrings[1],
+//				gpAR->uiTotalElapsedBattleTimeInMilliseconds % 60000 / 1000,
+//				gsTimeStrings[2]);
 			xp = gpAR->sCenterStartX + 70 - StringPixLength( str, FONT10ARIAL )/2;
 			yp = 290 + gpAR->bVerticalOffset;
 			SetFontForeground( FONT_YELLOW );

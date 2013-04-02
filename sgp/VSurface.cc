@@ -8,6 +8,8 @@
 #include "VSurface.h"
 #include "Video.h"
 
+#include <android/log.h>
+
 
 static SGPVSurface* gpVSurfaceHead = 0;
 
@@ -20,6 +22,7 @@ SGPVSurface::SGPVSurface(UINT16 const w, UINT16 const h, UINT8 const bpp) :
 #endif
 	next_(gpVSurfaceHead)
 {
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "SGPVsurface constructor called");
 	Assert(w > 0);
 	Assert(h > 0);
 
@@ -38,14 +41,20 @@ SGPVSurface::SGPVSurface(UINT16 const w, UINT16 const h, UINT8 const bpp) :
 		}
 
 		default:
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "LOGIC ERROR: Tried to create video surface with invalid bpp, must be 8 or 16.");
 			throw std::logic_error("Tried to create video surface with invalid bpp, must be 8 or 16.");
+			break;
 	}
-	if (!s) throw std::runtime_error("Failed to create SDL surface");
+	if (!s) {
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "RUNTIME ERROR: Failed to create SDL surface");
+		throw std::runtime_error("Failed to create SDL surface");
+	}
 	surface_ = s;
 	gpVSurfaceHead = this;
 #ifdef SGP_VIDEO_DEBUGGING
 	++guiVSurfaceSize;
 #endif
+    __android_log_print(ANDROID_LOG_INFO, "==TEST==", "SGPVSurface contructed without errors.");
 }
 
 
@@ -176,11 +185,13 @@ void InitializeVideoSurfaceManager(void)
 {
 	//Shouldn't be calling this if the video surface manager already exists.
 	//Call shutdown first...
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "Init VideosurfaceManager.");
 	Assert(gpVSurfaceHead == NULL);
 	gpVSurfaceHead = NULL;
 
 	// Create primary and backbuffer from globals
 	SetPrimaryVideoSurfaces();
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "done setting primary surfaces");
 }
 
 
@@ -211,6 +222,7 @@ SGPVSurface* AddVideoSurface(UINT16 Width, UINT16 Height, UINT8 BitDepth)
 
 SGPVSurface* AddVideoSurfaceFromFile(const char* const Filename)
 {
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "AddVideoSurfaceFromFile called");
 	AutoSGPImage img(CreateImage(Filename, IMAGE_ALLIMAGEDATA));
 
 	SGPVSurface* const vs = new SGPVSurface(img->usWidth, img->usHeight, img->ubBitDepth);
@@ -221,16 +233,19 @@ SGPVSurface* AddVideoSurfaceFromFile(const char* const Filename)
 	{
 		case  8: buffer_bpp = BUFFER_8BPP;  break;
 		case 16: buffer_bpp = BUFFER_16BPP; break;
-		default: throw std::logic_error("Invalid bpp");
+		default: __android_log_print(ANDROID_LOG_INFO, "==TEST==", "Invalid bpp error thrown");//throw std::logic_error("Invalid bpp");
 	}
 
 	{ SGPVSurface::Lock l(vs);
 		UINT8*  const dst   = l.Buffer<UINT8>();
 		UINT16  const pitch = l.Pitch() / (dst_bpp / 8); // pitch in pixels
 		SGPBox  const box   = { 0, 0, img->usWidth, img->usHeight };
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "CopyImageToBuffer invoked");
 		BOOLEAN const Ret   = CopyImageToBuffer(img, buffer_bpp, dst, pitch, vs->Height(), 0, 0, &box);
+		__android_log_print(ANDROID_LOG_INFO, "==TEST==", "CopyImageToBuffer finished");
 		if (!Ret)
 		{
+			__android_log_print(ANDROID_LOG_INFO, "==TEST==", "CopyImageToBuffer has returned error");
 			DebugMsg(TOPIC_VIDEOSURFACE, DBG_LEVEL_2, "Error Occured Copying SGPImage to video surface");
 		}
 	}
@@ -264,17 +279,24 @@ static void RecordVSurface(SGPVSurface* const vs, char const* const Filename, UI
 
 static void SetPrimaryVideoSurfaces(void)
 {
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "SetPrimaryVideoSurfaces called");
 	// Delete surfaces if they exist
 	DeletePrimaryVideoSurfaces();
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "...deleted old surfaces");
 
 #ifdef JA2
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "creating backbuffer");
 	g_back_buffer  = new SGPVSurface(GetBackBufferObject());
 	RECORD(g_back_buffer, "<BACKBUFFER>");
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "creating mouse buffer");
 	g_mouse_buffer = new SGPVSurface(GetMouseBufferObject());
 	RECORD(g_mouse_buffer, "<MOUSE_BUFFER>");
 #endif
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "creating frame buffer");
 	g_frame_buffer = new SGPVSurface(GetFrameBufferObject());
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "..frambuffer...");
 	RECORD(g_frame_buffer, "<FRAME_BUFFER>");
+	__android_log_print(ANDROID_LOG_INFO, "==TEST==", "framebuffer created");
 }
 
 #undef RECORD
@@ -359,7 +381,7 @@ void BltVideoSurface(SGPVSurface* const dst, SGPVSurface* const src, INT32 const
 		dstrect.y = iDestY;
 		SDL_BlitSurface(src->surface_, src_rect, dst->surface_, &dstrect);
 #if defined __GNUC__ && defined i386
-		__asm__ __volatile__("cld"); // XXX HACK000D
+//		__asm__ __volatile__("cld"); // XXX HACK000D
 #endif
 	}
 	else if (src_bpp < dst_bpp)

@@ -73,6 +73,7 @@
 #include "Video.h"
 #include "Screens.h"
 
+#include "Font.h"
 
 #define MAX_ON_DUTY_SOLDIERS 6
 
@@ -3401,7 +3402,11 @@ bool UIMouseOnValidAttackLocation(SOLDIERTYPE* const s)
 	if (HasObjectImprint(o) && s->ubProfile != o.ubImprintID)
 	{ // Access denied
 		PlayJA2Sample(RG_ID_INVALID, HIGHVOLUME, 1, MIDDLE);
-		ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_UI_FEEDBACK, L"\"%ls\"", TacticalStr[GUN_NOGOOD_FINGERPRINT]);
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                            char buf4[768];
+                            my__wchar2char( TacticalStr[GUN_NOGOOD_FINGERPRINT] , buf4);
+		ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_UI_FEEDBACK, L"\"%s\"", buf4);
+		//ScreenMsg(FONT_MCOLOR_LTYELLOW, MSG_UI_FEEDBACK, L"\"%ls\"", TacticalStr[GUN_NOGOOD_FINGERPRINT]);
 		return false;
 	}
 

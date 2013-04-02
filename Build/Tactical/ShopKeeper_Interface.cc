@@ -2839,7 +2839,15 @@ static void SetSkiFaceRegionHelpText(const INVENTORY_IN_SLOT* pInv, MOUSE_REGION
 	{
 		BuildItemHelpTextString( zTempText, lengthof(zTempText), pInv, ubScreenArea );
 		// add who owns it
-		swprintf( zHelpText, lengthof(zHelpText), L"%ls%ls %ls", gMercProfiles[ pInv->ubIdOfMercWhoOwnsTheItem ].zNickname, pMessageStrings[ MSG_DASH_S ], zTempText );
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[512];
+            char buf2[512];
+            char buf3[512];
+            my__wchar2char(  gMercProfiles[ pInv->ubIdOfMercWhoOwnsTheItem ].zNickname, buf1);
+            my__wchar2char(  pMessageStrings[ MSG_DASH_S ], buf2);
+            my__wchar2char(  zTempText, buf3);
+		swprintf( zHelpText, lengthof(zHelpText), L"%s%s %s", buf1, buf2, buf3 );
+		//swprintf( zHelpText, lengthof(zHelpText), L"%ls%ls %ls", gMercProfiles[ pInv->ubIdOfMercWhoOwnsTheItem ].zNickname, pMessageStrings[ MSG_DASH_S ], zTempText );
 	}
 	else
 	{
@@ -4188,7 +4196,12 @@ void InitShopKeeperSubTitledText(const wchar_t* pString)
 
 		// The subutitled text for what the merc is saying
 		wchar_t ShopKeeperTalkingText[SKI_SUBTITLE_TEXT_SIZE];
-		swprintf(ShopKeeperTalkingText, lengthof(ShopKeeperTalkingText), L"\"%ls\"", pString);
+		// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[512];
+            my__wchar2char( pString, buf1);
+
+		swprintf(ShopKeeperTalkingText, lengthof(ShopKeeperTalkingText), L"\"%s\"", buf1);
+		//swprintf(ShopKeeperTalkingText, lengthof(ShopKeeperTalkingText), L"\"%ls\"", pString);
 		g_popup_box = PrepareMercPopupBox(g_popup_box, BASIC_MERC_POPUP_BACKGROUND, BASIC_MERC_POPUP_BORDER, ShopKeeperTalkingText, 300, 0, 0, 0, &usActualWidth, &usActualHeight);
 
 		//position it to start under the guys face
@@ -6392,7 +6405,11 @@ static void BuildDoneWhenTimeString(wchar_t sString[], size_t const Length, Arms
 	// only show day if it's gonna take overnight
 	if ( GetWorldDay() != uiDay )
 	{
-		swprintf(sString, Length, L"%ls %d %02d:%02d", pDayStrings, uiDay, uiHour, uiMin);
+	    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[512];
+            my__wchar2char( pDayStrings, buf1);
+		swprintf(sString, Length, L"%s %d %02d:%02d", buf1, uiDay, uiHour, uiMin);
+		//swprintf(sString, Length, L"%ls %d %02d:%02d", pDayStrings, uiDay, uiHour, uiMin);
 	}
 	else
 	{
@@ -6415,7 +6432,15 @@ static void BuildItemHelpTextString(wchar_t sString[], size_t Length, const INVE
 				 ( ArmsDealerInfo[ gbSelectedArmsDealerID ].ubTypeOfArmsDealer == ARMS_DEALER_REPAIRS ) )
 		{
 			BuildRepairTimeString( zRepairTime, lengthof(zRepairTime), CalculateObjectItemRepairTime( gbSelectedArmsDealerID, &( pInv->ItemObject ) ) );
-			swprintf(sString, Length, L"%ls\n(%ls: %ls)", zHelpText, gzLateLocalizedString[STR_LATE_44], zRepairTime);
+			// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+            char buf1[512];
+            char buf2[512];
+            char buf3[512];
+            my__wchar2char( zHelpText, buf1);
+            my__wchar2char( gzLateLocalizedString[STR_LATE_44], buf2);
+            my__wchar2char( zRepairTime, buf3);
+			swprintf(sString, Length, L"%s\n(%s: %s)", buf1, buf2, buf3);
+			//swprintf(sString, Length, L"%ls\n(%ls: %ls)", zHelpText, gzLateLocalizedString[STR_LATE_44], zRepairTime);
 		}
 		else
 		{

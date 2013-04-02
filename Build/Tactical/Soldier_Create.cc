@@ -43,6 +43,9 @@
 #include "Debug.h"
 #include "ScreenIDs.h"
 
+#include "Font.h"
+
+
 
 // THESE 3 DIFFICULTY FACTORS MUST ALWAYS ADD UP TO 100% EXACTLY!!!
 #define DIFF_FACTOR_PLAYER_PROGRESS			50
@@ -483,10 +486,11 @@ static void TacticalCopySoldierFromProfile(SOLDIERTYPE& s, SOLDIERCREATE_STRUCT 
 	ProfileID         const  pid = c.ubProfile;
 	MERCPROFILESTRUCT const& p   = GetProfile(pid);
 
-	SET_PALETTEREP_ID(s.HeadPal,  p.HAIR);
-	SET_PALETTEREP_ID(s.VestPal,  p.VEST);
-	SET_PALETTEREP_ID(s.SkinPal,  p.SKIN);
-	SET_PALETTEREP_ID(s.PantsPal, p.PANTS);
+// MADE ARM SPECIFIC CHANGE HERE
+	SET_PALETTEREP_ID((char*)s.HeadPal,  (char*)p.HAIR);
+	SET_PALETTEREP_ID((char*)s.VestPal,  (char*)p.VEST);
+	SET_PALETTEREP_ID((char*)s.SkinPal,  (char*)p.SKIN);
+	SET_PALETTEREP_ID((char*)s.PantsPal, (char*)p.PANTS);
 
 	s.ubProfile       = pid;
 	s.ubScheduleID    = c.ubScheduleID;
@@ -640,17 +644,18 @@ static void GeneratePaletteForSoldier(SOLDIERTYPE* pSoldier, UINT8 ubSoldierClas
 	skin = (INT8)Random( NUMSKINS );
 	switch( skin )
 	{
+		// MADE ARM SPECIFIC CHANGE HERE
 		case PINKSKIN:
-			SET_PALETTEREP_ID( pSoldier->SkinPal,  "PINKSKIN" );
+			SET_PALETTEREP_ID( (char*)pSoldier->SkinPal,  "PINKSKIN" );
 			break;
 		case TANSKIN:
-			SET_PALETTEREP_ID( pSoldier->SkinPal,  "TANSKIN" );
+			SET_PALETTEREP_ID( (char*)pSoldier->SkinPal,  "TANSKIN" );
 			break;
 		case DARKSKIN:
-			SET_PALETTEREP_ID( pSoldier->SkinPal,  "DARKSKIN" );
+			SET_PALETTEREP_ID( (char*)pSoldier->SkinPal,  "DARKSKIN" );
 			break;
 		case BLACKSKIN:
-			SET_PALETTEREP_ID( pSoldier->SkinPal,  "BLACKSKIN" );
+			SET_PALETTEREP_ID( (char*)pSoldier->SkinPal,  "BLACKSKIN" );
 			break;
 		default:
 			AssertMsg( 0, "Skin type not accounted for." );
@@ -661,50 +666,52 @@ static void GeneratePaletteForSoldier(SOLDIERTYPE* pSoldier, UINT8 ubSoldierClas
 	hair = ChooseHairColor( pSoldier, skin );
 	switch( hair )
 	{
-		case BROWNHEAD: SET_PALETTEREP_ID( pSoldier->HeadPal, "BROWNHEAD" ); break;
-		case BLACKHEAD: SET_PALETTEREP_ID( pSoldier->HeadPal, "BLACKHEAD" ); break;
-		case WHITEHEAD: SET_PALETTEREP_ID( pSoldier->HeadPal, "WHITEHEAD" ); break;
-		case BLONDEHEAD:SET_PALETTEREP_ID( pSoldier->HeadPal, "BLONDHEAD" ); break;
-		case REDHEAD:   SET_PALETTEREP_ID( pSoldier->HeadPal, "REDHEAD"   ); break;
+		// MADE ARM SPECIFIC CHANGE HERE
+		case BROWNHEAD: SET_PALETTEREP_ID((char*) pSoldier->HeadPal, "BROWNHEAD" ); break;
+		case BLACKHEAD: SET_PALETTEREP_ID((char*) pSoldier->HeadPal, "BLACKHEAD" ); break;
+		case WHITEHEAD: SET_PALETTEREP_ID((char*) pSoldier->HeadPal, "WHITEHEAD" ); break;
+		case BLONDEHEAD:SET_PALETTEREP_ID((char*) pSoldier->HeadPal, "BLONDHEAD" ); break;
+		case REDHEAD:   SET_PALETTEREP_ID((char*) pSoldier->HeadPal, "REDHEAD"   ); break;
 		default:  AssertMsg( 0, "Hair type not accounted for.");						 break;
 	}
 
 	// OK, After skin, hair we could have a forced color scheme.. use here if so
 	switch( ubSoldierClass )
 	{
+		// MADE ARM SPECIFIC CHANGE HERE
 		case SOLDIER_CLASS_ADMINISTRATOR:
-			SET_PALETTEREP_ID( pSoldier->VestPal, "YELLOWVEST"  );
-			SET_PALETTEREP_ID( pSoldier->PantsPal, "GREENPANTS"   );
+			SET_PALETTEREP_ID((char*) pSoldier->VestPal, "YELLOWVEST"  );
+			SET_PALETTEREP_ID((char*) pSoldier->PantsPal, "GREENPANTS"   );
 			pSoldier->ubSoldierClass = ubSoldierClass;
 			return;
 		case SOLDIER_CLASS_ELITE:
-			SET_PALETTEREP_ID( pSoldier->VestPal, "BLACKSHIRT"  );
-			SET_PALETTEREP_ID( pSoldier->PantsPal, "BLACKPANTS"   );
+			SET_PALETTEREP_ID((char*) pSoldier->VestPal, "BLACKSHIRT"  );
+			SET_PALETTEREP_ID((char*) pSoldier->PantsPal, "BLACKPANTS"   );
 			pSoldier->ubSoldierClass = ubSoldierClass;
 			return;
 		case SOLDIER_CLASS_ARMY:
-			SET_PALETTEREP_ID( pSoldier->VestPal, "REDVEST"  );
-			SET_PALETTEREP_ID( pSoldier->PantsPal, "GREENPANTS"   );
+			SET_PALETTEREP_ID((char*) pSoldier->VestPal, "REDVEST"  );
+			SET_PALETTEREP_ID((char*) pSoldier->PantsPal, "GREENPANTS"   );
 			pSoldier->ubSoldierClass = ubSoldierClass;
 			return;
 		case SOLDIER_CLASS_GREEN_MILITIA:
-			SET_PALETTEREP_ID( pSoldier->VestPal, "GREENVEST"  );
-			SET_PALETTEREP_ID( pSoldier->PantsPal, "BEIGEPANTS"   );
+			SET_PALETTEREP_ID((char*) pSoldier->VestPal, "GREENVEST"  );
+			SET_PALETTEREP_ID((char*) pSoldier->PantsPal, "BEIGEPANTS"   );
 			pSoldier->ubSoldierClass = ubSoldierClass;
 			return;
 		case SOLDIER_CLASS_REG_MILITIA:
-			SET_PALETTEREP_ID( pSoldier->VestPal, "JEANVEST"  );
-			SET_PALETTEREP_ID( pSoldier->PantsPal, "BEIGEPANTS"   );
+			SET_PALETTEREP_ID((char*) pSoldier->VestPal, "JEANVEST"  );
+			SET_PALETTEREP_ID((char*) pSoldier->PantsPal, "BEIGEPANTS"   );
 			pSoldier->ubSoldierClass = ubSoldierClass;
 			return;
 		case SOLDIER_CLASS_ELITE_MILITIA:
-			SET_PALETTEREP_ID( pSoldier->VestPal, "BLUEVEST"  );
-			SET_PALETTEREP_ID( pSoldier->PantsPal, "BEIGEPANTS"   );
+			SET_PALETTEREP_ID((char*) pSoldier->VestPal, "BLUEVEST"  );
+			SET_PALETTEREP_ID((char*) pSoldier->PantsPal, "BEIGEPANTS"   );
 			pSoldier->ubSoldierClass = ubSoldierClass;
 			return;
 		case SOLDIER_CLASS_MINER:
-			SET_PALETTEREP_ID( pSoldier->VestPal, "greyVEST"  );
-			SET_PALETTEREP_ID( pSoldier->PantsPal, "BEIGEPANTS"   );
+			SET_PALETTEREP_ID((char*) pSoldier->VestPal, "greyVEST"  );
+			SET_PALETTEREP_ID((char*) pSoldier->PantsPal, "BEIGEPANTS"   );
 			pSoldier->ubSoldierClass = ubSoldierClass;
 			return;
 	}
@@ -722,28 +729,29 @@ static void GeneratePaletteForSoldier(SOLDIERTYPE* pSoldier, UINT8 ubSoldierClas
 		}
 		if( !fMercClothingScheme ) //CHEEZY CIVILIAN COLORS
 		{
+			// MADE ARM SPECIFIC CHANGE HERE
 			if( Random( 100 ) < 30 )
 			{ //30% chance that the civilian will choose a gaudy yellow shirt with pants.
-				SET_PALETTEREP_ID( pSoldier->VestPal, "GYELLOWSHIRT" );
+				SET_PALETTEREP_ID((char*) pSoldier->VestPal, "GYELLOWSHIRT" );
 				switch( Random( 3 ) )
 				{
-					case 0:	SET_PALETTEREP_ID( pSoldier->PantsPal, "TANPANTS"   ); break;
-					case 1: SET_PALETTEREP_ID( pSoldier->PantsPal, "BEIGEPANTS" ); break;
-					case 2: SET_PALETTEREP_ID( pSoldier->PantsPal, "GREENPANTS" ); break;
+					case 0:	SET_PALETTEREP_ID((char*) pSoldier->PantsPal, "TANPANTS"   ); break;
+					case 1: SET_PALETTEREP_ID((char*) pSoldier->PantsPal, "BEIGEPANTS" ); break;
+					case 2: SET_PALETTEREP_ID((char*) pSoldier->PantsPal, "GREENPANTS" ); break;
 				}
 			}
 			else
 			{ //70% chance that the civilian will choose jeans with a shirt.
-				SET_PALETTEREP_ID( pSoldier->PantsPal, "JEANPANTS" );
+				SET_PALETTEREP_ID((char*) pSoldier->PantsPal, "JEANPANTS" );
 				switch( Random( 7 ) )
 				{
-					case 0:	SET_PALETTEREP_ID( pSoldier->VestPal, "WHITEVEST"   ); break;
-					case 1: SET_PALETTEREP_ID( pSoldier->VestPal, "BLACKSHIRT"  ); break;
-					case 2: SET_PALETTEREP_ID( pSoldier->VestPal, "PURPLESHIRT" ); break;
-					case 3: SET_PALETTEREP_ID( pSoldier->VestPal, "BLUEVEST"    ); break;
-					case 4: SET_PALETTEREP_ID( pSoldier->VestPal, "BROWNVEST"   ); break;
-					case 5: SET_PALETTEREP_ID( pSoldier->VestPal, "JEANVEST"    ); break;
-					case 6: SET_PALETTEREP_ID( pSoldier->VestPal, "REDVEST"     ); break;
+					case 0:	SET_PALETTEREP_ID((char*) pSoldier->VestPal, "WHITEVEST"   ); break;
+					case 1: SET_PALETTEREP_ID((char*) pSoldier->VestPal, "BLACKSHIRT"  ); break;
+					case 2: SET_PALETTEREP_ID((char*) pSoldier->VestPal, "PURPLESHIRT" ); break;
+					case 3: SET_PALETTEREP_ID((char*) pSoldier->VestPal, "BLUEVEST"    ); break;
+					case 4: SET_PALETTEREP_ID((char*) pSoldier->VestPal, "BROWNVEST"   ); break;
+					case 5: SET_PALETTEREP_ID((char*) pSoldier->VestPal, "JEANVEST"    ); break;
+					case 6: SET_PALETTEREP_ID((char*) pSoldier->VestPal, "REDVEST"     ); break;
 				}
 			}
 			return;
@@ -752,37 +760,38 @@ static void GeneratePaletteForSoldier(SOLDIERTYPE* pSoldier, UINT8 ubSoldierClas
 		switch( Random( 3 ) )
 		{
 			case 0:
-				SET_PALETTEREP_ID( pSoldier->PantsPal, "GREENPANTS" );
+				// MADE ARM SPECIFIC CHANGES HERE
+				SET_PALETTEREP_ID((char*) pSoldier->PantsPal, "GREENPANTS" );
 				switch( Random( 4 ) )
 				{
-					case 0: SET_PALETTEREP_ID( pSoldier->VestPal, "YELLOWVEST" ); break;
-					case 1: SET_PALETTEREP_ID( pSoldier->VestPal, "WHITEVEST"  ); break;
-					case 2: SET_PALETTEREP_ID( pSoldier->VestPal, "BROWNVEST"  ); break;
-					case 3: SET_PALETTEREP_ID( pSoldier->VestPal, "GREENVEST"  ); break;
+					case 0: SET_PALETTEREP_ID((char*) pSoldier->VestPal, "YELLOWVEST" ); break;
+					case 1: SET_PALETTEREP_ID((char*) pSoldier->VestPal, "WHITEVEST"  ); break;
+					case 2: SET_PALETTEREP_ID((char*) pSoldier->VestPal, "BROWNVEST"  ); break;
+					case 3: SET_PALETTEREP_ID((char*) pSoldier->VestPal, "GREENVEST"  ); break;
 				}
 				break;
 			case 1:
-				SET_PALETTEREP_ID( pSoldier->PantsPal, "TANPANTS" );
+				SET_PALETTEREP_ID((char*) pSoldier->PantsPal, "TANPANTS" );
 				switch( Random( 8 ) )
 				{
-					case 0: SET_PALETTEREP_ID( pSoldier->VestPal, "YELLOWVEST" ); break;
-					case 1: SET_PALETTEREP_ID( pSoldier->VestPal, "WHITEVEST"  ); break;
-					case 2: SET_PALETTEREP_ID( pSoldier->VestPal, "BLACKSHIRT" ); break;
-					case 3: SET_PALETTEREP_ID( pSoldier->VestPal, "BLUEVEST"   ); break;
-					case 4: SET_PALETTEREP_ID( pSoldier->VestPal, "BROWNVEST"  ); break;
-					case 5: SET_PALETTEREP_ID( pSoldier->VestPal, "GREENVEST"  ); break;
-					case 6: SET_PALETTEREP_ID( pSoldier->VestPal, "JEANVEST"   ); break;
-					case 7: SET_PALETTEREP_ID( pSoldier->VestPal, "REDVEST"    ); break;
+					case 0: SET_PALETTEREP_ID((char*) pSoldier->VestPal, "YELLOWVEST" ); break;
+					case 1: SET_PALETTEREP_ID((char*) pSoldier->VestPal, "WHITEVEST"  ); break;
+					case 2: SET_PALETTEREP_ID((char*) pSoldier->VestPal, "BLACKSHIRT" ); break;
+					case 3: SET_PALETTEREP_ID((char*) pSoldier->VestPal, "BLUEVEST"   ); break;
+					case 4: SET_PALETTEREP_ID((char*) pSoldier->VestPal, "BROWNVEST"  ); break;
+					case 5: SET_PALETTEREP_ID((char*) pSoldier->VestPal, "GREENVEST"  ); break;
+					case 6: SET_PALETTEREP_ID((char*) pSoldier->VestPal, "JEANVEST"   ); break;
+					case 7: SET_PALETTEREP_ID((char*) pSoldier->VestPal, "REDVEST"    ); break;
 				}
 				break;
 			case 2:
-				SET_PALETTEREP_ID( pSoldier->PantsPal, "BLUEPANTS" );
+				SET_PALETTEREP_ID((char*) pSoldier->PantsPal, "BLUEPANTS" );
 				switch( Random( 4 ) )
 				{
-					case 0: SET_PALETTEREP_ID( pSoldier->VestPal, "YELLOWVEST" ); break;
-					case 1: SET_PALETTEREP_ID( pSoldier->VestPal, "WHITEVEST"  ); break;
-					case 2: SET_PALETTEREP_ID( pSoldier->VestPal, "REDVEST"    ); break;
-					case 3: SET_PALETTEREP_ID( pSoldier->VestPal, "BLACKSHIRT" ); break;
+					case 0: SET_PALETTEREP_ID((char*) pSoldier->VestPal, "YELLOWVEST" ); break;
+					case 1: SET_PALETTEREP_ID((char*) pSoldier->VestPal, "WHITEVEST"  ); break;
+					case 2: SET_PALETTEREP_ID((char*) pSoldier->VestPal, "REDVEST"    ); break;
+					case 3: SET_PALETTEREP_ID((char*) pSoldier->VestPal, "BLACKSHIRT" ); break;
 				}
 				break;
 		}
@@ -821,10 +830,11 @@ static void TacticalCopySoldierFromCreateStruct(SOLDIERTYPE& s, SOLDIERCREATE_ST
 
 	if (c.fVisible)
 	{
-		strcpy(s.HeadPal,  c.HeadPal);
-		strcpy(s.PantsPal, c.PantsPal);
-		strcpy(s.VestPal,  c.VestPal);
-		strcpy(s.SkinPal,  c.SkinPal);
+		// MADE ARM SPECIFIC CHANGE HERE
+		strcpy((char*)s.HeadPal,  (char*)c.HeadPal);
+		strcpy((char*)s.PantsPal, (char*)c.PantsPal);
+		strcpy((char*)s.VestPal,  (char*)c.VestPal);
+		strcpy((char*)s.SkinPal,  (char*)c.SkinPal);
 	}
 
 	/* KM:  March 25, 1999
@@ -1479,10 +1489,11 @@ void CreateDetailedPlacementGivenStaticDetailedPlacementAndBasicPlacementInfo(
 	pp->fVisible = spp->fVisible;
 	if( spp->fVisible )
 	{
-		strcpy(pp->HeadPal,  spp->HeadPal);
-		strcpy(pp->PantsPal, spp->PantsPal);
-		strcpy(pp->VestPal,  spp->VestPal);
-		strcpy(pp->SkinPal,  spp->SkinPal);
+		// MADE ARM SPECIFIC CHANGE HERE
+		strcpy((char*)pp->HeadPal, (char*) spp->HeadPal);
+		strcpy((char*)pp->PantsPal,(char*) spp->PantsPal);
+		strcpy((char*)pp->VestPal, (char*) spp->VestPal);
+		strcpy((char*)pp->SkinPal, (char*) spp->SkinPal);
 	}
 
 	//This isn't perfect, however, it blindly brings over the items from the static
@@ -1595,10 +1606,11 @@ static void UpdateStaticDetailedPlacementWithProfileInformation(SOLDIERCREATE_ST
 
 	MERCPROFILESTRUCT& p = GetProfile(ubProfile);
 
-	SET_PALETTEREP_ID(spp->HeadPal,  p.HAIR);
-	SET_PALETTEREP_ID(spp->VestPal,  p.VEST);
-	SET_PALETTEREP_ID(spp->SkinPal,  p.SKIN);
-	SET_PALETTEREP_ID(spp->PantsPal, p.PANTS);
+// MADE ARM SPECIFIC CHANGE HERE
+	SET_PALETTEREP_ID((char*)spp->HeadPal,  (char*)p.HAIR);
+	SET_PALETTEREP_ID((char*)spp->VestPal,  (char*)p.VEST);
+	SET_PALETTEREP_ID((char*)spp->SkinPal,  (char*)p.SKIN);
+	SET_PALETTEREP_ID((char*)spp->PantsPal, (char*)p.PANTS);
 
 	wcscpy(spp->name, p.zNickname);
 

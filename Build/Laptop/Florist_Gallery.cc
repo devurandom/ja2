@@ -11,6 +11,7 @@
 #include "Video.h"
 #include "Font_Control.h"
 
+#include "Font.h"
 
 #define	FLOR_GALLERY_TITLE_FONT								FONT10ARIAL
 #define	FLOR_GALLERY_TITLE_COLOR							FONT_MCOLOR_WHITE
@@ -307,7 +308,13 @@ static BOOLEAN DisplayFloralDescriptions(void)
 			uiStartLoc += FLOR_GALLERY_TEXT_TITLE_SIZE;
 			LoadEncryptedDataFromFile(FLOR_GALLERY_TEXT_FILE, sTemp, uiStartLoc, FLOR_GALLERY_TEXT_PRICE_SIZE);
 			swscanf( sTemp, L"%hu", &usPrice);
-			swprintf(sTemp, lengthof(sTemp), L"$%d.00 %ls", usPrice, pMessageStrings[MSG_USDOLLAR_ABBREVIATION]);
+					// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[512];
+                    //char buf2[256];
+                    my__wchar2char(pMessageStrings[MSG_USDOLLAR_ABBREVIATION], buf1);
+                    //my__wchar2char(VideoConfercingText[AIM_MEMBER_WITH_MEDICAL], buf2);
+			//swprintf(sTemp, lengthof(sTemp), L"$%d.00 %ls", usPrice, buf1);
+			swprintf(sTemp, lengthof(sTemp), L"$%d.00 %s", usPrice, buf1);
 			DrawTextToScreen(sTemp, FLOR_GALLERY_FLOWER_TITLE_X, usPosY + FLOR_GALLERY_FLOWER_PRICE_OFFSET_Y, 0, FLOR_GALLERY_FLOWER_PRICE_FONT, FLOR_GALLERY_FLOWER_PRICE_COLOR, FONT_MCOLOR_BLACK, LEFT_JUSTIFIED);
 		}
 

@@ -41,6 +41,8 @@
 #include "Debug.h"
 #include "Items.h"
 
+#include "Font.h"
+
 
 static SOLDIERTYPE* gOutOfTurnOrder[MAXMERCS];
 UINT8 gubOutOfTurnPersons = 0;

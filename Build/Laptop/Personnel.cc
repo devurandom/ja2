@@ -650,7 +650,13 @@ static void DisplayCharName(SOLDIERTYPE const& s)
 	if (sTownName != NULL)
 	{
 		//nick name - town name
-		swprintf(sString, lengthof(sString), L"%ls - %ls", s.name, sTownName);
+					// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[512];
+                    char buf2[512];
+                    my__wchar2char(s.name, buf1);
+                    my__wchar2char(sTownName, buf2);
+		//swprintf(sString, lengthof(sString), L"%ls - %ls", s.name, sTownName);
+		swprintf(sString, lengthof(sString), L"%s - %s", buf1, buf2);
 	}
 	else
 	{
@@ -696,7 +702,13 @@ static void PrintStatWithDelta(UINT idx, INT8 stat, INT8 delta)
 		MPrint(sX, y, sString);
 	}
 	swprintf(sString, lengthof(sString), L"%d", stat);
-	mprintf(pers_stat_x, y, L"%ls:", str_stat[idx]);
+                    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[512];
+                    //char buf2[512];
+                    my__wchar2char(str_stat[idx], buf1);
+                    //my__wchar2char(sTownName, buf2);
+	//mprintf(pers_stat_x, y, L"%ls:", buf1);
+	mprintf(pers_stat_x, y, L"%s:", buf1);
 	FindFontRightCoordinates(pers_stat_x, 0, TEXT_BOX_WIDTH - 20, 0, sString, PERS_FONT, &sX, &sY);
 	MPrint(sX, y, sString);
 }
@@ -739,7 +751,13 @@ static void DisplayCharStats(SOLDIERTYPE const& s)
 	{
 		wcslcpy(sString, pPOWStrings[1], lengthof(sString));
 	}
-	mprintf(pers_stat_x, pers_stat_y[0], L"%ls:", str_stat_health);
+	                    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[512];
+                    //char buf2[512];
+                    my__wchar2char(str_stat_health, buf1);
+                    //my__wchar2char(sTownName, buf2);
+	//mprintf(pers_stat_x, pers_stat_y[0], L"%ls:", buf1);
+	mprintf(pers_stat_x, pers_stat_y[0], L"%s:", buf1);
 	FindFontRightCoordinates(pers_stat_x, 0, TEXT_BOX_WIDTH - 20, 0, sString, PERS_FONT, &sX, &sY);
 	MPrint(sX, pers_stat_y[0], sString);
 
@@ -748,7 +766,13 @@ static void DisplayCharStats(SOLDIERTYPE const& s)
 		for (INT32 i = 1; i < 11; ++i)
 		{
 			const INT32 y = pers_stat_y[i];
-			mprintf(pers_stat_x, y, L"%ls:", str_stat[i]);
+				                    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[512];
+                    //char buf2[512];
+                    my__wchar2char(str_stat[i], buf1);
+                    //my__wchar2char(sTownName, buf2);
+			//mprintf(pers_stat_x, y, L"%ls:", buf1);
+			mprintf(pers_stat_x, y, L"%s:", buf1);
 			const wchar_t* const na = gpStrategicString[STR_PB_NOTAPPLICABLE_ABBREVIATION];
 			FindFontRightCoordinates(pers_stat_x, 0, TEXT_BOX_WIDTH - 20, 0, na, PERS_FONT, &sX, &sY);
 			MPrint(sX, y, na);
@@ -811,7 +835,13 @@ static void DisplayCharStats(SOLDIERTYPE const& s)
 			if (bSkill1 == bSkill2)
 			{
 				// The 2 skills are the same, add the '(expert)' at the end
-				swprintf(sString, lengthof(sString), L"%ls %ls", gzMercSkillText[bSkill1], gzMercSkillText[NUM_SKILLTRAITS]);
+                    // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[512];
+                    char buf2[512];
+                    my__wchar2char(gzMercSkillText[bSkill1], buf1);
+                    my__wchar2char(gzMercSkillText[NUM_SKILLTRAITS], buf2);
+				//swprintf(sString, lengthof(sString), L"%ls %ls", gzMercSkillText[bSkill1], gzMercSkillText[NUM_SKILLTRAITS]);
+				swprintf(sString, lengthof(sString), L"%ls %ls", buf1, buf2);
 				FindFontRightCoordinates(pers_stat_x, 0, TEXT_BOX_WIDTH - 20, 0, sString, PERS_FONT, &sX, &sY);
 
 				//KM: April 16, 1999
@@ -1364,7 +1394,13 @@ static void DisplayPersonnelSummary(void)
 
 	if (fCurrentTeamMode)
 	{
-		mprintf(PERS_CURR_TEAM_X, PERS_CURR_TEAM_Y, L"%ls ( %d )", pPersonelTeamStrings[0], GetNumberOfMercsDeadOrAliveOnPlayersTeam());
+	     // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[512];
+                    //char buf2[512];
+                    my__wchar2char( pPersonelTeamStrings[0], buf1);
+                    //my__wchar2char(gzMercSkillText[NUM_SKILLTRAITS], buf2);
+		//mprintf(PERS_CURR_TEAM_X, PERS_CURR_TEAM_Y, L"%ls ( %d )", pPersonelTeamStrings[0], GetNumberOfMercsDeadOrAliveOnPlayersTeam());
+		mprintf(PERS_CURR_TEAM_X, PERS_CURR_TEAM_Y, L"%s ( %d )", buf1, GetNumberOfMercsDeadOrAliveOnPlayersTeam());
 		DisplayCostOfCurrentTeam();
 
 		const wchar_t* const s = pPersonelTeamStrings[1];
@@ -1380,8 +1416,13 @@ static void DisplayPersonnelSummary(void)
 		INT16 sY = 0;
 		FindFontCenterCoordinates(PERS_CURR_TEAM_X, 0, 65, 0, s, FONT10ARIAL, &sX, &sY);
 		MPrint(sX, PERS_CURR_TEAM_Y, s);
-
-		mprintf(PERS_CURR_TEAM_X, PERS_DEPART_TEAM_Y, L"%ls ( %d )", pPersonelTeamStrings[1], GetNumberOfPastMercsOnPlayersTeam());
+        	     // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[512];
+                    //char buf2[512];
+                    my__wchar2char( pPersonelTeamStrings[1], buf1);
+                    //my__wchar2char(gzMercSkillText[NUM_SKILLTRAITS], buf2);
+		//mprintf(PERS_CURR_TEAM_X, PERS_DEPART_TEAM_Y, L"%ls ( %d )", pPersonelTeamStrings[1], GetNumberOfPastMercsOnPlayersTeam());
+		mprintf(PERS_CURR_TEAM_X, PERS_DEPART_TEAM_Y, L"%s ( %d )", buf1, GetNumberOfPastMercsOnPlayersTeam());
 		DisplayStateOfPastTeamMembers();
 	}
 }
@@ -1897,7 +1938,13 @@ static void DisplayDepartedCharStats(MERCPROFILESTRUCT const& p, INT32 const iSt
 	INT8 const life = p.bLife;
 	INT8 const cur  = (iState == DEPARTED_DEAD ? 0 : life);
 	swprintf(sString, lengthof(sString), L"%d/%d", cur, life);
-	mprintf(pers_stat_x, pers_stat_y[0], L"%ls:", str_stat_health);
+	 // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                    char buf1[512];
+                    //char buf2[512];
+                    my__wchar2char( str_stat_health, buf1);
+                    //my__wchar2char(gzMercSkillText[NUM_SKILLTRAITS], buf2);
+	//mprintf(pers_stat_x, pers_stat_y[0], L"%ls:", str_stat_health);
+	mprintf(pers_stat_x, pers_stat_y[0], L"%s:", buf1);
 	FindFontRightCoordinates(pers_stat_x, 0, TEXT_BOX_WIDTH - 20, 0, sString, PERS_FONT, &sX, &sY);
 	MPrint(sX, pers_stat_y[0], sString);
 
@@ -2405,12 +2452,28 @@ static void DisplayEmploymentinformation(SOLDIERTYPE const& s)
 					const INT hours = iTimeLeftOnContract % uiMinutesInDay / 60;
 					if (days > 0)
 					{
-						swprintf(sString, lengthof(sString), L"%d%ls %d%ls / %d%ls", days, gpStrategicString[STR_PB_DAYS_ABBREVIATION], hours, gpStrategicString[STR_PB_HOURS_ABBREVIATION], s.iTotalContractLength, gpStrategicString[STR_PB_DAYS_ABBREVIATION]);
+					    	 // ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                            char buf1[256];
+                            char buf2[256];
+                            char buf3[256];
+                            my__wchar2char( gpStrategicString[STR_PB_DAYS_ABBREVIATION], buf1);
+                            my__wchar2char(gpStrategicString[STR_PB_HOURS_ABBREVIATION], buf2);
+                            my__wchar2char(gpStrategicString[STR_PB_DAYS_ABBREVIATION], buf3);
+						//swprintf(sString, lengthof(sString), L"%d%ls %d%ls / %d%ls", days, gpStrategicString[STR_PB_DAYS_ABBREVIATION], hours, gpStrategicString[STR_PB_HOURS_ABBREVIATION], s.iTotalContractLength, gpStrategicString[STR_PB_DAYS_ABBREVIATION]);
+						swprintf(sString, lengthof(sString), L"%d%s %d%s / %d%s", days, buf1, hours, buf2, s.iTotalContractLength, buf3);
 					}
 					else //else there is under a day left
 					{
 						//DEF: removed 2/7/99
-						swprintf(sString, lengthof(sString), L"%d%ls / %d%ls", hours, gpStrategicString[STR_PB_HOURS_ABBREVIATION], s.iTotalContractLength, gpStrategicString[STR_PB_DAYS_ABBREVIATION]);
+						// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                            char buf1[256];
+                            char buf2[256];
+                            //char buf3[256];
+                            my__wchar2char( gpStrategicString[STR_PB_DAYS_ABBREVIATION], buf1);
+                            my__wchar2char(gpStrategicString[STR_PB_HOURS_ABBREVIATION], buf2);
+                            //my__wchar2char(gpStrategicString[STR_PB_DAYS_ABBREVIATION], buf3);
+						//swprintf(sString, lengthof(sString), L"%d%ls / %d%ls", hours, gpStrategicString[STR_PB_HOURS_ABBREVIATION], s.iTotalContractLength, gpStrategicString[STR_PB_DAYS_ABBREVIATION]);
+						swprintf(sString, lengthof(sString), L"%d%s / %d%s", hours, buf2, s.iTotalContractLength, buf1);
 					}
 				}
 				else if (s.ubWhatKindOfMercAmI == MERC_TYPE__MERC)
@@ -2431,7 +2494,15 @@ static void DisplayEmploymentinformation(SOLDIERTYPE const& s)
 			case 1: // total contract time served
 				MPrint(pers_stat_x, pers_stat_y[i], pPersonnelScreenStrings[PRSNL_TXT_TOTAL_SERVICE]);
 				//./DEF 2/4/99: total service days used to be calced as 'days -1'
-				swprintf(sString, lengthof(sString), L"%d %ls", p.usTotalDaysServed, gpStrategicString[STR_PB_DAYS_ABBREVIATION]);
+										// ANDROID: this here tests the longstring-BUG by converting the longsstrings to charstrings
+                            char buf1[256];
+                            //char buf2[256];
+                            //char buf3[256];
+                            my__wchar2char( gpStrategicString[STR_PB_DAYS_ABBREVIATION], buf1);
+                            //my__wchar2char(gpStrategicString[STR_PB_HOURS_ABBREVIATION], buf2);
+                            //my__wchar2char(gpStrategicString[STR_PB_DAYS_ABBREVIATION], buf3);
+				//swprintf(sString, lengthof(sString), L"%d %ls", p.usTotalDaysServed, gpStrategicString[STR_PB_DAYS_ABBREVIATION]);
+				swprintf(sString, lengthof(sString), L"%d %s", p.usTotalDaysServed, buf1);
 				FindFontRightCoordinates(pers_stat_data_x, 0, TEXT_BOX_WIDTH - 20, 0, sString, PERS_FONT, &sX, &sY);
 				MPrint(sX, pers_stat_y[i], sString);
 				break;
